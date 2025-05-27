@@ -2,24 +2,87 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Shakespeare Demo</title>
+  <title>Shakespeare Reader</title>
 
-  <!-- CETEIcean: renders TEI in-browser -->
+  <!-- CETEIcean renders TEI in-browser -->
   <script src="https://cdn.jsdelivr.net/npm/ceteicean@latest/dist/CETEI.js"></script>
 
   <style>
-    body{font-family:Georgia,serif;line-height:1.4;margin:1rem}
+    body{font-family:Georgia,serif;line-height:1.5;margin:1rem;max-width:45rem}
+    select{font-size:1rem;margin-bottom:1rem}
     tei-s{display:block;margin-left:1.5em}
     tei-speaker{font-weight:bold}
   </style>
 </head>
 <body>
+  <h1>Shakespeare Reader</h1>
+  <label>Play: <select id="picker"></select></label>
   <div id="viewer">Loading…</div>
 
   <script>
+    /* ---- file list (add/remove as needed) ------------------------- */
+    const plays = [
+      "alls-well-that-ends-well_TEIsimple_FolgerShakespeare.xml",
+      "a-midsummer-nights-dream_TEIsimple_FolgerShakespeare.xml",
+      "antony-and-cleopatra_TEIsimple_FolgerShakespeare.xml",
+      "as-you-like-it_TEIsimple_FolgerShakespeare.xml",
+      "coriolanus_TEIsimple_FolgerShakespeare.xml",
+      "cymbeline_TEIsimple_FolgerShakespeare.xml",
+      "hamlet_TEIsimple_FolgerShakespeare.xml",
+      "henry-iv-part-1_TEIsimple_FolgerShakespeare.xml",
+      "henry-iv-part-2_TEIsimple_FolgerShakespeare.xml",
+      "henry-v_TEIsimple_FolgerShakespeare.xml",
+      "henry-viii_TEIsimple_FolgerShakespeare.xml",
+      "henry-vi-part-1_TEIsimple_FolgerShakespeare.xml",
+      "henry-vi-part-2_TEIsimple_FolgerShakespeare.xml",
+      "henry-vi-part-3_TEIsimple_FolgerShakespeare.xml",
+      "julius-caesar_TEIsimple_FolgerShakespeare.xml",
+      "king-john_TEIsimple_FolgerShakespeare.xml",
+      "king-lear_TEIsimple_FolgerShakespeare.xml",
+      "loves-labors-lost_TEIsimple_FolgerShakespeare.xml",
+      "macbeth_TEIsimple_FolgerShakespeare.xml",
+      "measure-for-measure_TEIsimple_FolgerShakespeare.xml",
+      "much-ado-about-nothing_TEIsimple_FolgerShakespeare.xml",
+      "othello_TEIsimple_FolgerShakespeare.xml",
+      "pericles_TEIsimple_FolgerShakespeare.xml",
+      "richard-ii_TEIsimple_FolgerShakespeare.xml",
+      "richard-iii_TEIsimple_FolgerShakespeare.xml",
+      "romeo-and-juliet_TEIsimple_FolgerShakespeare.xml",
+      "the-comedy-of-errors_TEIsimple_FolgerShakespeare.xml",
+      "the-merchant-of-venice_TEIsimple_FolgerShakespeare.xml",
+      "the-merry-wives-of-windsor_TEIsimple_FolgerShakespeare.xml",
+      "the-taming-of-the-shrew_TEIsimple_FolgerShakespeare.xml",
+      "the-tempest_TEIsimple_FolgerShakespeare.xml",
+      "the-two-gentlemen-of-verona_TEIsimple_FolgerShakespeare.xml",
+      "the-winters-tale_TEIsimple_FolgerShakespeare.xml",
+      "timon-of-athens_TEIsimple_FolgerShakespeare.xml",
+      "titus-andronicus_TEIsimple_FolgerShakespeare.xml",
+      "troilus-and-cressida_TEIsimple_FolgerShakespeare.xml",
+      "twelfth-night_TEIsimple_FolgerShakespeare.xml"
+    ];
+
+    /* ---- populate dropdown --------------------------------------- */
+    const picker = document.getElementById("picker");
+    plays.forEach(f => {
+      const opt = document.createElement("option");
+      opt.value = f;
+      opt.textContent = f
+        .replace(/_TEIsimple_FolgerShakespeare\.xml$/,"")  // strip suffix
+        .replace(/-/g," ")                                 // hyphens → spaces
+        .replace(/\b\w/g,c=>c.toUpperCase());              // title-case
+      picker.appendChild(opt);
+    });
+
+    /* ---- load helper --------------------------------------------- */
     const CETEI = new CETEIcean();
-    CETEI.getHTML5('XML/hamlet.xml').then(doc =>
-      document.getElementById('viewer').replaceWith(doc));
+    function loadPlay(file){
+      const holder = document.getElementById("viewer");
+      holder.textContent = "Loading…";
+      CETEI.getHTML5("XML/"+file).then(doc => holder.replaceWith(doc));
+    }
+
+    picker.addEventListener("change", e => loadPlay(e.target.value));
+    loadPlay(plays[0]);          // initial load
   </script>
 </body>
 </html>
