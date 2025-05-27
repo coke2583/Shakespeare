@@ -17,7 +17,7 @@
       color:#fff;
     }
     select{font-size:1rem;margin-bottom:1rem}
-    #viewer{white-space:normal}
+    #viewer{white-space:pre-wrap}
   </style>
 </head>
 <body>
@@ -74,9 +74,9 @@
       const o = document.createElement("option");
       o.value = f;
       o.textContent = f
-        .replace(/_TEIsimple_FolgerShakespeare\.xml$/,"")
-        .replace(/-/g," ")
-        .replace(/\b\w/g,c=>c.toUpperCase());
+        .replace(/_TEIsimple_FolgerShakespeare\.xml$/, "")
+        .replace(/-/g, " ")
+        .replace(/\b\w/g, c => c.toUpperCase());
       picker.appendChild(o);
     });
 
@@ -86,8 +86,8 @@
     function teiToHtml(node){
       if(!node) return "";
       let out="";
-      node.childNodes.forEach(ch=>{
-        if(ch.nodeType===Node.TEXT_NODE){
+      node.childNodes.forEach(ch => {
+        if(ch.nodeType === Node.TEXT_NODE){
           out += ch.nodeValue.trim();
         } else {
           switch(ch.nodeName){
@@ -102,22 +102,22 @@
               out += "<br>";
               break;
             case "l":
-              out += teiToHtml(ch)+"<br>";
+              out += teiToHtml(ch) + "<br>";
               break;
             case "p":
-              out += teiToHtml(ch)+"<br><br>";
+              out += teiToHtml(ch) + "<br><br>";
               break;
             case "speaker":
-              out += "<strong>"+teiToHtml(ch)+"</strong> ";
+              out += "<strong>" + teiToHtml(ch) + "</strong> ";
               break;
             case "stage":
-              out += "<em>"+teiToHtml(ch)+"</em>";
+              out += "<em>" + teiToHtml(ch) + "</em>";
               break;
             case "head":
-              out += "<h3>"+teiToHtml(ch)+"</h3>";
+              out += "<h3>" + teiToHtml(ch) + "</h3>";
               break;
             case "sp":
-              out += "<p>"+teiToHtml(ch)+"</p>";
+              out += "<p>" + teiToHtml(ch) + "</p>";
               break;
             default:
               out += teiToHtml(ch);
@@ -140,9 +140,10 @@
       viewer.textContent = "Loading…";
 
       try{
-        const xmlText = await fetch(url).then(r=>r.text());
+        const xmlText = await fetch(url).then(r => r.text());
         const xmlDoc  = parser.parseFromString(xmlText, "application/xml");
         const body    = xmlDoc.querySelector("body");
+        // Prefer rendered HTML; fallback to raw text
         viewer.innerHTML = body ? teiToHtml(body) : xmlText;
       }catch(e){
         viewer.textContent = `❌ ${e}`;
@@ -150,8 +151,10 @@
       }
     }
 
-    document.getElementById("loadBtn").addEventListener("click", () => loadPlay(picker.value));
-    loadPlay(plays[0]);                 // first load
+    document.getElementById("loadBtn")
+            .addEventListener("click", () => loadPlay(picker.value));
+
+    loadPlay(plays[0]); // initial load
   </script>
 </body>
 </html>
