@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <title>Shakespeare Reader</title>
 
-  <!-- CETEIcean renders TEI in-browser -->
+  <!-- CETEIcean: loads TEI, 15 kB -->
   <script src="https://cdn.jsdelivr.net/npm/ceteicean@latest/dist/CETEI.js"></script>
 
   <style>
@@ -20,7 +20,7 @@
   <div id="viewer">Loading…</div>
 
   <script>
-    /* ---- file list (add/remove as needed) ------------------------- */
+    /* -------------------- file list -------------------- */
     const plays = [
       "alls-well-that-ends-well_TEIsimple_FolgerShakespeare.xml",
       "a-midsummer-nights-dream_TEIsimple_FolgerShakespeare.xml",
@@ -61,28 +61,39 @@
       "twelfth-night_TEIsimple_FolgerShakespeare.xml"
     ];
 
-    /* ---- populate dropdown --------------------------------------- */
+    /* ---------------- dropdown ------------------------- */
     const picker = document.getElementById("picker");
     plays.forEach(f => {
-      const opt = document.createElement("option");
-      opt.value = f;
-      opt.textContent = f
-        .replace(/_TEIsimple_FolgerShakespeare\.xml$/,"")  // strip suffix
-        .replace(/-/g," ")                                 // hyphens → spaces
-        .replace(/\b\w/g,c=>c.toUpperCase());              // title-case
-      picker.appendChild(opt);
+      const o = document.createElement("option");
+      o.value = f;
+      o.textContent = f
+        .replace(/_TEIsimple_FolgerShakespeare\.xml$/,"")
+        .replace(/-/g," ")
+        .replace(/\b\w/g,c=>c.toUpperCase());
+      picker.appendChild(o);
     });
 
-    /* ---- load helper --------------------------------------------- */
-    const CETEI = new CETEIcean();
+    /* --------------- loader ---------------------------- */
+    const cetei = new CETEI();          // correct constructor
     function loadPlay(file){
-      const holder = document.getElementById("viewer");
-      holder.textContent = "Loading…";
-      CETEI.getHTML5("XML/"+file).then(doc => holder.replaceWith(doc));
+      const url = `XML/${file}`;        // relative path resolves to full GitHub Pages URL :contentReference[oaicite:1]{index=1}
+      console.log("Fetching:", url);
+
+      let viewer = document.getElementById("viewer");
+      if (!viewer){
+        viewer = document.createElement("div");
+        viewer.id = "viewer";
+        document.body.appendChild(viewer);
+      }
+      viewer.textContent = "Loading…";
+
+      cetei.getHTML5(url)
+           .then(doc => { doc.id="viewer"; viewer.replaceWith(doc); })
+           .catch(e  => { viewer.textContent=`❌ ${e}`; console.error(e); });
     }
 
     picker.addEventListener("change", e => loadPlay(e.target.value));
-    loadPlay(plays[0]);          // initial load
+    loadPlay(plays[0]);                 // first load
   </script>
 </body>
 </html>
