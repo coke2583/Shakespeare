@@ -8,7 +8,14 @@
   <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/5cAAwMCAKP3IboAAAAASUVORK5CYII="/>
 
   <style>
-    body{font-family:Georgia,serif;line-height:1.5;margin:1rem;max-width:45rem}
+    body{
+      font-family:Georgia,serif;
+      line-height:1.5;
+      margin:1rem;
+      max-width:45rem;
+      background:#000;
+      color:#fff;
+    }
     select{font-size:1rem;margin-bottom:1rem}
     #viewer{white-space:pre-wrap}
   </style>
@@ -67,39 +74,87 @@
       const o = document.createElement("option");
       o.value = f;
       o.textContent = f
-        .replace(/_TEIsimple_FolgerShakespeare\.xml$/,"")
-        .replace(/-/g," ")
-        .replace(/\b\w/g,c=>c.toUpperCase());
+        .replace(/_TEIsimple_FolgerShakespeare\.xml$/, "")
+        .replace(/-/g, " ")
+        .replace(/\b\w/g, c => c.toUpperCase());
       picker.appendChild(o);
     });
 
     /* --------------- loader ---------------------------- */
     const parser = new DOMParser();
+
+    function teiToHtml(node){
+      if(!node) return "";
+      let out="";
+      node.childNodes.forEach(ch => {
+        if(ch.nodeType === Node.TEXT_NODE){
+          out += ch.nodeValue.trim();
+        } else {
+          switch(ch.nodeName){
+            case "w":
+            case "pc":
+              out += ch.textContent;
+              break;
+            case "c":
+              out += " ";
+              break;
+            case "lb":
+              out += "<br>";
+              break;
+            case "l":
+              out += teiToHtml(ch) + "<br>";
+              break;
+            case "p":
+              out += teiToHtml(ch) + "<br><br>";
+              break;
+            case "speaker":
+              out += "<strong>" + teiToHtml(ch) + "</strong> ";
+              break;
+            case "stage":
+              out += "<em>" + teiToHtml(ch) + "</em>";
+              break;
+            case "head":
+              out += "<h3>" + teiToHtml(ch) + "</h3>";
+              break;
+            case "sp":
+              out += "<p>" + teiToHtml(ch) + "</p>";
+              break;
+            default:
+              out += teiToHtml(ch);
+          }
+        }
+      });
+      return out;
+    }
+
     async function loadPlay(file){
       const url = `XML/${file}`;
       console.log("Fetching:", url);
 
       let viewer = document.getElementById("viewer");
-      if (!viewer){
+      if(!viewer){
         viewer = document.createElement("div");
         viewer.id = "viewer";
         document.body.appendChild(viewer);
       }
       viewer.textContent = "Loading…";
 
-      try {
+      try{
         const xmlText = await fetch(url).then(r => r.text());
         const xmlDoc  = parser.parseFromString(xmlText, "application/xml");
         const body    = xmlDoc.querySelector("body");
-        viewer.textContent = body ? body.textContent : xmlText;
-      } catch (e){
+        // Prefer rendered HTML; fallback to raw text
+        viewer.innerHTML = body ? teiToHtml(body) : xmlText;
+      }catch(e){
         viewer.textContent = `❌ ${e}`;
         console.error(e);
       }
     }
 
-    document.getElementById("loadBtn").addEventListener("click", () => loadPlay(picker.value));
-    loadPlay(plays[0]);                 // first load
+    document.getElementById("loadBtn")
+            .addEventListener("click", () => loadPlay(picker.value));
+
+    loadPlay(plays[0]); // initial load
   </script>
 </body>
 </html>
