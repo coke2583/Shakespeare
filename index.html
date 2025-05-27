@@ -4,19 +4,26 @@
   <meta charset="utf-8">
   <title>Shakespeare Reader</title>
 
-  <!-- CETEIcean: loads TEI, 15 kB -->
-  <script src="https://cdn.jsdelivr.net/npm/ceteicean@latest/dist/CETEI.js"></script>
+  <!-- Inlined favicon to avoid 404 requests -->
+  <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/5cAAwMCAKP3IboAAAAASUVORK5CYII="/>
 
   <style>
-    body{font-family:Georgia,serif;line-height:1.5;margin:1rem;max-width:45rem}
+    body{
+      font-family:Georgia,serif;
+      line-height:1.5;
+      margin:1rem;
+      max-width:45rem;
+      background:#000;
+      color:#fff;
+    }
     select{font-size:1rem;margin-bottom:1rem}
-    tei-s{display:block;margin-left:1.5em}
-    tei-speaker{font-weight:bold}
+    #viewer{white-space:normal}
   </style>
 </head>
 <body>
   <h1>Shakespeare Reader</h1>
   <label>Play: <select id="picker"></select></label>
+  <button id="loadBtn">Load</button>
   <div id="viewer">Loading…</div>
 
   <script>
@@ -74,25 +81,76 @@
     });
 
     /* --------------- loader ---------------------------- */
-    const cetei = new CETEI();          // correct constructor
-    function loadPlay(file){
-      const url = `XML/${file}`;        // relative path resolves to full GitHub Pages URL :contentReference[oaicite:1]{index=1}
+    const parser = new DOMParser();
+
+    function teiToHtml(node){
+      if(!node) return "";
+      let out="";
+      node.childNodes.forEach(ch=>{
+        if(ch.nodeType===Node.TEXT_NODE){
+          out += ch.nodeValue.trim();
+        } else {
+          switch(ch.nodeName){
+            case "w":
+            case "pc":
+              out += ch.textContent;
+              break;
+            case "c":
+              out += " ";
+              break;
+            case "lb":
+              out += "<br>";
+              break;
+            case "l":
+              out += teiToHtml(ch)+"<br>";
+              break;
+            case "p":
+              out += teiToHtml(ch)+"<br><br>";
+              break;
+            case "speaker":
+              out += "<strong>"+teiToHtml(ch)+"</strong> ";
+              break;
+            case "stage":
+              out += "<em>"+teiToHtml(ch)+"</em>";
+              break;
+            case "head":
+              out += "<h3>"+teiToHtml(ch)+"</h3>";
+              break;
+            case "sp":
+              out += "<p>"+teiToHtml(ch)+"</p>";
+              break;
+            default:
+              out += teiToHtml(ch);
+          }
+        }
+      });
+      return out;
+    }
+
+    async function loadPlay(file){
+      const url = `XML/${file}`;
       console.log("Fetching:", url);
 
       let viewer = document.getElementById("viewer");
-      if (!viewer){
+      if(!viewer){
         viewer = document.createElement("div");
         viewer.id = "viewer";
         document.body.appendChild(viewer);
       }
       viewer.textContent = "Loading…";
 
-      cetei.getHTML5(url)
-           .then(doc => { doc.id="viewer"; viewer.replaceWith(doc); })
-           .catch(e  => { viewer.textContent=`❌ ${e}`; console.error(e); });
+      try{
+        const xmlText = await fetch(url).then(r=>r.text());
+        const xmlDoc  = parser.parseFromString(xmlText, "application/xml");
+        const body    = xmlDoc.querySelector("body");
+        viewer.innerHTML = body ? teiToHtml(body) : xmlText;
+      }catch(e){
+        viewer.textContent = `❌ ${e}`;
+        console.error(e);
+      }
     }
 
-    picker.addEventListener("change", e => loadPlay(e.target.value));
+    document.getElementById("loadBtn").addEventListener("click", () => loadPlay(picker.value));
     loadPlay(plays[0]);                 // first load
   </script>
 </body>
