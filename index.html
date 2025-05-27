@@ -4,19 +4,19 @@
   <meta charset="utf-8">
   <title>Shakespeare Reader</title>
 
-  <!-- CETEIcean: loads TEI, 15 kB -->
-  <script src="https://cdn.jsdelivr.net/npm/ceteicean@latest/dist/CETEI.js"></script>
+  <!-- Inlined favicon to avoid 404 requests -->
+  <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/5cAAwMCAKP3IboAAAAASUVORK5CYII="/>
 
   <style>
     body{font-family:Georgia,serif;line-height:1.5;margin:1rem;max-width:45rem}
     select{font-size:1rem;margin-bottom:1rem}
-    tei-s{display:block;margin-left:1.5em}
-    tei-speaker{font-weight:bold}
+    #viewer{white-space:pre-wrap}
   </style>
 </head>
 <body>
   <h1>Shakespeare Reader</h1>
   <label>Play: <select id="picker"></select></label>
+  <button id="loadBtn">Load</button>
   <div id="viewer">Loading…</div>
 
   <script>
@@ -74,9 +74,9 @@
     });
 
     /* --------------- loader ---------------------------- */
-    const cetei = new CETEI();          // correct constructor
-    function loadPlay(file){
-      const url = `XML/${file}`;        // relative path resolves to full GitHub Pages URL :contentReference[oaicite:1]{index=1}
+    const parser = new DOMParser();
+    async function loadPlay(file){
+      const url = `XML/${file}`;
       console.log("Fetching:", url);
 
       let viewer = document.getElementById("viewer");
@@ -87,12 +87,18 @@
       }
       viewer.textContent = "Loading…";
 
-      cetei.getHTML5(url)
-           .then(doc => { doc.id="viewer"; viewer.replaceWith(doc); })
-           .catch(e  => { viewer.textContent=`❌ ${e}`; console.error(e); });
+      try {
+        const xmlText = await fetch(url).then(r => r.text());
+        const xmlDoc  = parser.parseFromString(xmlText, "application/xml");
+        const body    = xmlDoc.querySelector("body");
+        viewer.textContent = body ? body.textContent : xmlText;
+      } catch (e){
+        viewer.textContent = `❌ ${e}`;
+        console.error(e);
+      }
     }
 
-    picker.addEventListener("change", e => loadPlay(e.target.value));
+    document.getElementById("loadBtn").addEventListener("click", () => loadPlay(picker.value));
     loadPlay(plays[0]);                 // first load
   </script>
 </body>
