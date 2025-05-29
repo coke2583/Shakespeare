@@ -16,197 +16,204 @@
       background:#000;
       color:#fff;
     }
-    select{font-size:1rem;margin-bottom:1rem}
+    select{font-size:1rem;margin:0 0 1rem 0}
     #viewer{white-space:pre-wrap}
   </style>
 </head>
 <body>
   <h1>Shakespeare Reader</h1>
-  <label>Play: <select id="picker"></select></label>
-  <button id="loadBtn">Load</button>
-  <label>Act: <select id="actPicker"></select></label>
-  <label>Scene: <select id="scenePicker"></select></label>
+
+  <label>Play:
+    <select id="playPicker"></select>
+  </label>
+  <button id="loadBtn">Load</button><br>
+
+  <label>Act:
+    <select id="actPicker"></select>
+  </label>
+  <label>Scene:
+    <select id="scenePicker"></select>
+  </label>
+
   <div id="viewer">Loading…</div>
 
   <script>
-    /* -------------------- file list -------------------- */
-    const plays = [
-      "alls-well-that-ends-well_TEIsimple_FolgerShakespeare.xml",
-      "a-midsummer-nights-dream_TEIsimple_FolgerShakespeare.xml",
-      "antony-and-cleopatra_TEIsimple_FolgerShakespeare.xml",
-      "as-you-like-it_TEIsimple_FolgerShakespeare.xml",
-      "coriolanus_TEIsimple_FolgerShakespeare.xml",
-      "cymbeline_TEIsimple_FolgerShakespeare.xml",
-      "hamlet_TEIsimple_FolgerShakespeare.xml",
-      "henry-iv-part-1_TEIsimple_FolgerShakespeare.xml",
-      "henry-iv-part-2_TEIsimple_FolgerShakespeare.xml",
-      "henry-v_TEIsimple_FolgerShakespeare.xml",
-      "henry-viii_TEIsimple_FolgerShakespeare.xml",
-      "henry-vi-part-1_TEIsimple_FolgerShakespeare.xml",
-      "henry-vi-part-2_TEIsimple_FolgerShakespeare.xml",
-      "henry-vi-part-3_TEIsimple_FolgerShakespeare.xml",
-      "julius-caesar_TEIsimple_FolgerShakespeare.xml",
-      "king-john_TEIsimple_FolgerShakespeare.xml",
-      "king-lear_TEIsimple_FolgerShakespeare.xml",
-      "loves-labors-lost_TEIsimple_FolgerShakespeare.xml",
-      "macbeth_TEIsimple_FolgerShakespeare.xml",
-      "measure-for-measure_TEIsimple_FolgerShakespeare.xml",
-      "much-ado-about-nothing_TEIsimple_FolgerShakespeare.xml",
-      "othello_TEIsimple_FolgerShakespeare.xml",
-      "pericles_TEIsimple_FolgerShakespeare.xml",
-      "richard-ii_TEIsimple_FolgerShakespeare.xml",
-      "richard-iii_TEIsimple_FolgerShakespeare.xml",
-      "romeo-and-juliet_TEIsimple_FolgerShakespeare.xml",
-      "the-comedy-of-errors_TEIsimple_FolgerShakespeare.xml",
-      "the-merchant-of-venice_TEIsimple_FolgerShakespeare.xml",
-      "the-merry-wives-of-windsor_TEIsimple_FolgerShakespeare.xml",
-      "the-taming-of-the-shrew_TEIsimple_FolgerShakespeare.xml",
-      "the-tempest_TEIsimple_FolgerShakespeare.xml",
-      "the-two-gentlemen-of-verona_TEIsimple_FolgerShakespeare.xml",
-      "the-winters-tale_TEIsimple_FolgerShakespeare.xml",
-      "timon-of-athens_TEIsimple_FolgerShakespeare.xml",
-      "titus-andronicus_TEIsimple_FolgerShakespeare.xml",
-      "troilus-and-cressida_TEIsimple_FolgerShakespeare.xml",
-      "twelfth-night_TEIsimple_FolgerShakespeare.xml"
-    ];
+  /* ------------ available files ---------------- */
+  const plays = [
+    "alls-well-that-ends-well_TEIsimple_FolgerShakespeare.xml",
+    "a-midsummer-nights-dream_TEIsimple_FolgerShakespeare.xml",
+    "antony-and-cleopatra_TEIsimple_FolgerShakespeare.xml",
+    "as-you-like-it_TEIsimple_FolgerShakespeare.xml",
+    "coriolanus_TEIsimple_FolgerShakespeare.xml",
+    "cymbeline_TEIsimple_FolgerShakespeare.xml",
+    "hamlet_TEIsimple_FolgerShakespeare.xml",
+    "henry-iv-part-1_TEIsimple_FolgerShakespeare.xml",
+    "henry-iv-part-2_TEIsimple_FolgerShakespeare.xml",
+    "henry-v_TEIsimple_FolgerShakespeare.xml",
+    "henry-viii_TEIsimple_FolgerShakespeare.xml",
+    "henry-vi-part-1_TEIsimple_FolgerShakespeare.xml",
+    "henry-vi-part-2_TEIsimple_FolgerShakespeare.xml",
+    "henry-vi-part-3_TEIsimple_FolgerShakespeare.xml",
+    "julius-caesar_TEIsimple_FolgerShakespeare.xml",
+    "king-john_TEIsimple_FolgerShakespeare.xml",
+    "king-lear_TEIsimple_FolgerShakespeare.xml",
+    "loves-labors-lost_TEIsimple_FolgerShakespeare.xml",
+    "macbeth_TEIsimple_FolgerShakespeare.xml",
+    "measure-for-measure_TEIsimple_FolgerShakespeare.xml",
+    "much-ado-about-nothing_TEIsimple_FolgerShakespeare.xml",
+    "othello_TEIsimple_FolgerShakespeare.xml",
+    "pericles_TEIsimple_FolgerShakespeare.xml",
+    "richard-ii_TEIsimple_FolgerShakespeare.xml",
+    "richard-iii_TEIsimple_FolgerShakespeare.xml",
+    "romeo-and-juliet_TEIsimple_FolgerShakespeare.xml",
+    "the-comedy-of-errors_TEIsimple_FolgerShakespeare.xml",
+    "the-merchant-of-venice_TEIsimple_FolgerShakespeare.xml",
+    "the-merry-wives-of-windsor_TEIsimple_FolgerShakespeare.xml",
+    "the-taming-of-the-shrew_TEIsimple_FolgerShakespeare.xml",
+    "the-tempest_TEIsimple_FolgerShakespeare.xml",
+    "the-two-gentlemen-of-verona_TEIsimple_FolgerShakespeare.xml",
+    "the-winters-tale_TEIsimple_FolgerShakespeare.xml",
+    "timon-of-athens_TEIsimple_FolgerShakespeare.xml",
+    "titus-andronicus_TEIsimple_FolgerShakespeare.xml",
+    "troilus-and-cressida_TEIsimple_FolgerShakespeare.xml",
+    "twelfth-night_TEIsimple_FolgerShakespeare.xml"
+  ];
 
-    /* ---------------- dropdown ------------------------- */
-    const picker = document.getElementById("picker");
-    plays.forEach(f => {
-      const o = document.createElement("option");
-      o.value = f;
-      o.textContent = f
-        .replace(/_TEIsimple_FolgerShakespeare\.xml$/, "")
-        .replace(/-/g, " ")
-        .replace(/\b\w/g, c => c.toUpperCase());
-      picker.appendChild(o);
-    });
+  /* ------------ element handles --------------- */
+  const playPicker  = document.getElementById("playPicker");
+  const actPicker   = document.getElementById("actPicker");
+  const scenePicker = document.getElementById("scenePicker");
+  const viewer      = document.getElementById("viewer");
+  const parser      = new DOMParser();
+  let   currentDoc  = null;
 
-    /* --------------- loader ---------------------------- */
-    const parser = new DOMParser();
-    const actPicker   = document.getElementById("actPicker");
-    const scenePicker = document.getElementById("scenePicker");
-    let   currentDoc  = null;
+  /* ----------- populate play list ------------- */
+  plays.forEach(f=>{
+    const o = document.createElement("option");
+    o.value = f;
+    o.textContent = f.replace(/_TEIsimple_FolgerShakespeare\.xml$/,"")
+                     .replace(/-/g," ")
+                     .replace(/\b\w/g,c=>c.toUpperCase());
+    playPicker.appendChild(o);
+  });
 
-function teiToHtml(node){
-      if(!node) return "";
-      let out="";
-      node.childNodes.forEach(ch => {
-        if(ch.nodeType === Node.TEXT_NODE){
-          out += ch.nodeValue.trim();
-        } else {
-          switch(ch.nodeName){
-            case "w":
-            case "pc":
-              out += ch.textContent;
-              break;
-            case "c":
-              out += " ";
-              break;
-            case "lb":
-              out += "<br>";
-              break;
-            case "l":
-              out += teiToHtml(ch) + "<br>";
-              break;
-            case "p":
-              out += teiToHtml(ch) + "<br><br>";
-              break;
-            case "speaker":
-              out += "<strong>" + teiToHtml(ch) + "</strong> ";
-              break;
-            case "stage":
-              out += "<em>" + teiToHtml(ch) + "</em><br>";
-              break;
-            case "castList":
-              out += "<h2>Dramatis Personae</h2><ul>" + teiToHtml(ch) + "</ul><br>";
-              break;
-            case "castItem":
-              out += "<li>" + teiToHtml(ch) + "</li>";
-              break;
-            case "head":
-              out += "<h3>" + teiToHtml(ch) + "</h3>";
-              break;
-            case "sp":
-              out += "<p>" + teiToHtml(ch) + "</p>";
-              break;
-            default:
-              out += teiToHtml(ch);
+  /* ------------- TEI → HTML ------------------- */
+  function teiToHtml(node){
+    if(!node) return "";
+    let out = "";
+    node.childNodes.forEach(ch=>{
+      if(ch.nodeType === Node.TEXT_NODE){
+        out += ch.nodeValue.trim();
+      }else{
+        switch(ch.nodeName){
+          case "w":
+          case "pc":
+            out += ch.textContent;
+            break;
+          case "c":
+            out += " ";
+            break;
+          case "lb":
+            out += "<br>";
+            break;
+          case "l":
+            out += teiToHtml(ch)+"<br>";
+            break;
+          case "p":
+            out += teiToHtml(ch)+"<br><br>";
+            break;
+          case "speaker":
+            out += "<strong>"+teiToHtml(ch)+"</strong> ";
+            break;
+          case "stage":            /* italics + line break */
+            out += "<em>"+teiToHtml(ch)+"</em><br>";
+            break;
+          case "castList":
+            out += "<h2>Dramatis Personae</h2><ul>"+teiToHtml(ch)+"</ul><br>";
+            break;
+          case "castItem": {
+            const name = ch.querySelector("role");
+            const desc = ch.querySelector("roleDesc");
+            const text = (name?teiToHtml(name).trim():"") +
+                         (desc?" — "+teiToHtml(desc).trim():"");
+            if(text.trim()) out += "<li>"+text+"</li>";
+            break;
           }
+          case "head":
+            out += "<h3>"+teiToHtml(ch)+"</h3>";
+            break;
+          case "sp":
+            out += "<p>"+teiToHtml(ch)+"</p>";
+            break;
+          default:
+            out += teiToHtml(ch);
         }
-      });
-      return out;
-}
-
-    function populateScenes(act){
-      scenePicker.innerHTML = "";
-      const scenes = act ? act.querySelectorAll('div[type="scene"]') : [];
-      scenes.forEach((sc, i) => {
-        const o = document.createElement('option');
-        const head = sc.querySelector('head');
-        o.value = i;
-        o.textContent = head ? head.textContent.trim() : `Scene ${i+1}`;
-        scenePicker.appendChild(o);
-      });
-    }
-
-    function populateActs(xmlDoc){
-      const acts = xmlDoc.querySelectorAll('body div[type="act"]');
-      actPicker.innerHTML = "";
-      acts.forEach((act, i) => {
-        const o = document.createElement('option');
-        const head = act.querySelector('head');
-        o.value = i;
-        o.textContent = head ? head.textContent.trim() : `Act ${i+1}`;
-        actPicker.appendChild(o);
-      });
-      actPicker.onchange = () => {
-        populateScenes(acts[actPicker.value]);
-        displayScene();
-      };
-      populateScenes(acts[0]);
-    }
-
-    function displayScene(){
-      const viewer = document.getElementById('viewer');
-      viewer.innerHTML = '';
-      if(!currentDoc) return;
-      const acts = currentDoc.querySelectorAll('body div[type="act"]');
-      const act  = acts[actPicker.value] || acts[0];
-      const scenes = act.querySelectorAll('div[type="scene"]');
-      const scene = scenes[scenePicker.value] || scenes[0];
-      const castList = currentDoc.querySelector('castList');
-      if(castList) viewer.innerHTML += teiToHtml(castList);
-      viewer.innerHTML += teiToHtml(scene);
-    }
-    async function loadPlay(file){
-      const url = `XML/${file}`;
-      console.log("Fetching:", url);
-
-      let viewer = document.getElementById("viewer");
-      if(!viewer){
-        viewer = document.createElement("div");
-        viewer.id = "viewer";
-        document.body.appendChild(viewer);
       }
-      viewer.textContent = "Loading…";
+    });
+    return out;
+  }
 
-      try{
-        const xmlText = await fetch(url).then(r => r.text());
-        currentDoc  = parser.parseFromString(xmlText, "application/xml");
-        populateActs(currentDoc);
-        scenePicker.onchange = displayScene;
-        displayScene();
-      }catch(e){
-        viewer.textContent = `❌ ${e}`;
-        console.error(e);
-      }
+  /* ----------- populate acts/scenes ----------- */
+  function populateActs(xml){
+    actPicker.innerHTML = "";
+    const acts = xml.querySelectorAll('body div[type="act"]');
+    acts.forEach((act,i)=>{
+      const o = document.createElement("option");
+      const head = act.querySelector("head");
+      o.value = i;
+      o.textContent = head?head.textContent.trim():`Act ${i+1}`;
+      actPicker.appendChild(o);
+    });
+    actPicker.onchange = ()=>{populateScenes(acts[actPicker.value]); displayScene();};
+    populateScenes(acts[0]);
+  }
+
+  function populateScenes(act){
+    scenePicker.innerHTML = "";
+    const scenes = act?act.querySelectorAll('div[type="scene"]'):[];
+    scenes.forEach((sc,i)=>{
+      const o = document.createElement("option");
+      const head = sc.querySelector("head");
+      o.value = i;
+      o.textContent = head?head.textContent.trim():`Scene ${i+1}`;
+      scenePicker.appendChild(o);
+    });
+    scenePicker.onchange = displayScene;
+  }
+
+  /* --------------- render view ---------------- */
+  function displayScene(){
+    if(!currentDoc) return;
+    const acts = currentDoc.querySelectorAll('body div[type="act"]');
+    const act  = acts[actPicker.value] || acts[0];
+    const scenes = act.querySelectorAll('div[type="scene"]');
+    const scene  = scenes[scenePicker.value] || scenes[0];
+
+    viewer.innerHTML = "";                      // reset
+    const castList = currentDoc.querySelector("castList");
+    if(castList) viewer.innerHTML += teiToHtml(castList);
+    viewer.innerHTML += teiToHtml(scene);
+  }
+
+  /* --------------- main load ------------------ */
+  async function loadPlay(file){
+    viewer.textContent = "Loading…";
+    try{
+      const xml = await fetch(`XML/${file}`).then(r=>r.text());
+      currentDoc = parser.parseFromString(xml,"application/xml");
+      populateActs(currentDoc);
+      displayScene();
+    }catch(e){
+      viewer.textContent = "❌ "+e;
+      console.error(e);
     }
+  }
 
-    document.getElementById("loadBtn")
-            .addEventListener("click", () => loadPlay(picker.value));
+  /* -------------- wire-up --------------------- */
+  document.getElementById("loadBtn")
+          .addEventListener("click",()=>loadPlay(playPicker.value));
 
-    loadPlay(plays[0]); // initial load
+  loadPlay(plays[0]);                /* first view */
   </script>
 </body>
 </html>
