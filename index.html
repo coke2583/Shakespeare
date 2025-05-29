@@ -18,6 +18,8 @@
     }
     select{font-size:1rem;margin:0 0 1rem 0}
     #viewer{white-space:pre-wrap}
+    .speech{position:relative;}
+    .copy-btn{margin-left:.5rem;font-size:.8rem;}
   </style>
 </head>
 <body>
@@ -84,6 +86,15 @@
   const actPicker   = document.getElementById("actPicker");
   const scenePicker = document.getElementById("scenePicker");
   const viewer      = document.getElementById("viewer");
+  viewer.addEventListener('click',e=>{
+    if(e.target.classList.contains('copy-btn')){
+      const speech = e.target.closest('.speech').querySelector('.speech-text').innerText;
+      navigator.clipboard.writeText(speech).then(()=>{
+        e.target.textContent = 'Copied!';
+        setTimeout(()=>{e.target.textContent='Copy';},1000);
+      });
+    }
+  });
   const parser      = new DOMParser();
   let   currentDoc  = null;
   let   castHtml    = "";
@@ -144,7 +155,8 @@
             out += "<h3>"+teiToHtml(ch)+"</h3>";
             break;
           case "sp":
-            out += "<p>"+teiToHtml(ch)+"</p>";
+            out += '<p class="speech"><span class="speech-text">'+teiToHtml(ch)+'</span>'+
+                   ' <button class="copy-btn" aria-label="Copy speech">Copy</button></p>';
             break;
           default:
             out += teiToHtml(ch);
