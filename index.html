@@ -24,6 +24,8 @@
   <h1>Shakespeare Reader</h1>
   <label>Play: <select id="picker"></select></label>
   <button id="loadBtn">Load</button>
+  <label>Act: <select id="actPicker"></select></label>
+  <label>Scene: <select id="scenePicker"></select></label>
   <div id="viewer">Loading…</div>
 
   <script>
@@ -82,8 +84,11 @@
 
     /* --------------- loader ---------------------------- */
     const parser = new DOMParser();
+    const actPicker   = document.getElementById("actPicker");
+    const scenePicker = document.getElementById("scenePicker");
+    let   currentDoc  = null;
 
-    function teiToHtml(node){
+function teiToHtml(node){
       if(!node) return "";
       let out="";
       node.childNodes.forEach(ch => {
@@ -111,8 +116,20 @@
               out += "<strong>" + teiToHtml(ch) + "</strong> ";
               break;
             case "stage":
-              out += "<em>" + teiToHtml(ch) + "</em>";
+              out += "<em>" + teiToHtml(ch) + "</em><br>";
               break;
+            case "castList":
+              out += "<h2>Dramatis Personae</h2><ul>" + teiToHtml(ch) + "</ul><br>";
+              break;
+            case "castItem": {
+              const name  = ch.querySelector('role');
+              const desc  = ch.querySelector('roleDesc');
+              const text  =
+                (name ? teiToHtml(name).trim() : '') +
+                (desc ? ' — ' + teiToHtml(desc).trim() : '');
+              if(text.trim()) out += "<li>" + text + "</li>";
+              break;
+            }
             case "head":
               out += "<h3>" + teiToHtml(ch) + "</h3>";
               break;
@@ -125,8 +142,55 @@
         }
       });
       return out;
+}
+
+    function populateScenes(act){
+      scenePicker.innerHTML = "";
+      const scenes = act ? act.querySelectorAll('div[type="scene"]') : [];
+      scenes.forEach((sc, i) => {
+        const o = document.createElement('option');
+        const head = sc.querySelector('head');
+        o.value = i;
+        o.textContent = head ? head.textContent.trim() : `Scene ${i+1}`;
+        scenePicker.appendChild(o);
+      });
     }
 
+    function populateActs(xmlDoc){
+      const acts = xmlDoc.querySelectorAll('body div[type="act"]');
+      actPicker.innerHTML = "";
+      acts.forEach((act, i) => {
+        const o = document.createElement('option');
+        const head = act.querySelector('head');
+        o.value = i;
+        o.textContent = head ? head.textContent.trim() : `Act ${i+1}`;
+        actPicker.appendChild(o);
+      });
+      actPicker.onchange = () => {
+        populateScenes(acts[actPicker.value]);
+        displayScene(false);
+      };
+      populateScenes(acts[0]);
+    }
+
+    function displayScene(showCast = false){
+      const viewer = document.getElementById('viewer');
+      viewer.innerHTML = '';
+      if(!currentDoc) return;
+      const acts = currentDoc.querySelectorAll('body div[type="act"]');
+      const act  = acts[actPicker.value] || acts[0];
+      const scenes = act.querySelectorAll('div[type="scene"]');
+      const scene = scenes[scenePicker.value] || scenes[0];
+
+      if(showCast){
+        const castList = currentDoc.querySelector('castList');
+        if(castList) viewer.innerHTML += teiToHtml(castList);
+      }
+
+      const actHead = act.querySelector('head');
+      if(actHead) viewer.innerHTML += '<h2>' + teiToHtml(actHead) + '</h2>';
+      viewer.innerHTML += teiToHtml(scene);
+    }
     async function loadPlay(file){
       const url = `XML/${file}`;
       console.log("Fetching:", url);
@@ -141,10 +205,10 @@
 
       try{
         const xmlText = await fetch(url).then(r => r.text());
-        const xmlDoc  = parser.parseFromString(xmlText, "application/xml");
-        const body    = xmlDoc.querySelector("body");
-        // Prefer rendered HTML; fallback to raw text
-        viewer.innerHTML = body ? teiToHtml(body) : xmlText;
+        currentDoc  = parser.parseFromString(xmlText, "application/xml");
+        populateActs(currentDoc);
+        scenePicker.onchange = () => displayScene(false);
+        displayScene(true);
       }catch(e){
         viewer.textContent = `❌ ${e}`;
         console.error(e);
