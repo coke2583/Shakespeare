@@ -9,7 +9,7 @@
 
   <style>
     body{
-      font-family:Georgia,serif;
+      font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
       line-height:1.5;
       margin:1rem;
       max-width:45rem;
@@ -20,6 +20,10 @@
     #viewer{white-space:pre-wrap}
     .speech{position:relative;}
     .copy-btn{margin-left:.5rem;font-size:.8rem;}
+    #cast h3{
+      font-size:1rem;
+      margin:0;
+    }
   </style>
 </head>
 <body>
@@ -122,7 +126,13 @@
     let out = "";
     node.childNodes.forEach(ch=>{
       if(ch.nodeType === Node.TEXT_NODE){
-        out += ch.nodeValue.trim();
+        let text = ch.nodeValue;
+        const startSpace = /^\s/.test(text);
+        const endSpace   = /\s$/.test(text);
+        text = text.trim().replace(/\s+/g, ' ');
+        if(startSpace) text = ' ' + text;
+        if(endSpace) text = text + ' ';
+        out += text;
       }else{
         switch(ch.nodeName){
           case "w":
@@ -141,9 +151,17 @@
           case "p":
             out += teiToHtml(ch)+"<br><br>";
             break;
-          case "speaker":
-            out += "<strong>"+teiToHtml(ch)+"</strong> ";
+          case "speaker": {
+            out += "<strong>"+teiToHtml(ch)+"</strong>";
+            let next = ch.nextElementSibling;
+            while(next && next.nodeType!==1){next=next.nextSibling;}
+            if(next && next.nodeName==="stage"){
+              out += " ";
+            }else{
+              out += "<br>";
+            }
             break;
+          }
           case "stage":
             out += "<em>"+teiToHtml(ch)+"</em><br>";
             break;
@@ -159,7 +177,11 @@
             break;
           }
           case "head":
-            out += "<h3>"+teiToHtml(ch)+"</h3>";
+            if(ch.parentNode && ch.parentNode.nodeName === "castGroup"){
+              out += "<li><strong>"+teiToHtml(ch)+"</strong></li>";
+            }else{
+              out += "<h3>"+teiToHtml(ch)+"</h3>";
+            }
             break;
           case "sp":
             out += '<p class="speech"><span class="speech-text">'+teiToHtml(ch)+'</span>'+
@@ -200,6 +222,11 @@
   function populateScenes(act){
     scenePicker.innerHTML = "";
     const scenes = act?act.querySelectorAll('div[type="scene"]'):[];
+    const charOpt = document.createElement("option");
+    charOpt.value = "cast";
+    charOpt.textContent = "Characters";
+    scenePicker.appendChild(charOpt);
+
     const all = document.createElement("option");
     all.value = "all";
     all.textContent = "All Scenes";
@@ -220,17 +247,21 @@
     if(!currentDoc) return;
     const acts = currentDoc.querySelectorAll('body div[type="act"]');
     let html = "";
-    let showCast = false;
+    if(scenePicker.value === "cast"){
+      castDiv.innerHTML = castHtml;
+      viewer.innerHTML = "";
+      nextBtn.style.display = "none";
+      window.scrollTo(0,0);
+      return;
+    }
+
     if(actPicker.value === "all"){
-      showCast = true;
       acts.forEach(a=>{html += teiToHtml(a);});
     }else{
       const act  = acts[actPicker.value];
       if(scenePicker.value === "all"){
-        showCast = actPicker.value === "0";
         html += teiToHtml(act);
       }else{
-        showCast = actPicker.value === "0";
         const scenes = act.querySelectorAll('div[type="scene"]');
         const scene  = scenes[scenePicker.value];
         html += teiToHtml(scene);
@@ -238,7 +269,7 @@
     }
 
     viewer.innerHTML = html;
-    castDiv.innerHTML = showCast ? castHtml : "";
+    castDiv.innerHTML = "";
 
     if(actPicker.value !== "all" && scenePicker.value !== "all" && getNextSceneIndices()){
       nextBtn.style.display = "";
