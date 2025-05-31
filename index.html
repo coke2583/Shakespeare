@@ -1,29 +1,18 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <title>Shakespeare Reader</title>
-
-  <!-- Inlined favicon to avoid 404 requests -->
-  <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/5cAAwMCAKP3IboAAAAASUVORK5CYII="/>
-
-  <!-- External CSS -->
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-  <h1>Shakespeare Reader</h1>
-
-  <label>Play:  <select id="playPicker"></select></label>
-  <button id="loadBtn">Load</button><br>
-
-  <label>Act:   <select id="actPicker"></select></label>
-  <label>Scene: <select id="scenePicker"></select></label>
-
-  <div id="cast"></div>
-  <div id="viewer">Loading…</div>
-  <button id="nextBtn" style="display:none">Next Scene →</button>
-
-  <!-- External JavaScript -->
-  <script src="js/main.js"></script>
+  <main class="hero">
+    <h1>Shakespeare Reader</h1>
+    <p class="subtitle fade-in">Plays in your browser</p>
+    <a href="reader.html" class="read-btn">READ</a>
+    <div class="ghost-container"></div>
+  </main>
+  <script type="module" src="js/landing.js"></script>
 </body>
 </html>

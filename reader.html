@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Shakespeare Reader</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABC AQAAAC1HAwCAAAAC0lEQVR42mP8/5cAAwMCAKP3IboAAAAASUVORK5CYII="/>
+  <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<header>
+  <a href="index.html" class="home">Home</a>
+</header>
+<main>
+  <h1>Shakespeare Reader</h1>
+  <div class="controls">
+    <label>Play: <select id="playPicker"></select></label>
+    <button id="loadBtn">Load</button>
+    <label>Act: <select id="actPicker"></select></label>
+    <label>Scene: <select id="scenePicker"></select></label>
+  </div>
+  <div id="cast"></div>
+  <div id="viewer" aria-live="polite">Loading…</div>
+  <button id="nextBtn" style="display:none">Next Scene →</button>
+  <div id="announce" class="visually-hidden" aria-live="polite"></div>
+</main>
+<script type="module" src="js/reader.js"></script>
+</body>
+</html>
