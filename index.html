@@ -9,7 +9,7 @@
 
   <style>
     body{
-      font-family:Georgia,serif;
+      font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
       line-height:1.5;
       margin:1rem;
       max-width:45rem;
@@ -20,6 +20,10 @@
     #viewer{white-space:pre-wrap}
     .speech{position:relative;}
     .copy-btn{margin-left:.5rem;font-size:.8rem;}
+    #cast h3{
+      font-size:1rem;
+      margin:0;
+    }
   </style>
 </head>
 <body>
@@ -159,7 +163,11 @@
             break;
           }
           case "head":
-            out += "<h3>"+teiToHtml(ch)+"</h3>";
+            if(ch.parentNode && ch.parentNode.nodeName === "castGroup"){
+              out += "<li><strong>"+teiToHtml(ch)+"</strong></li>";
+            }else{
+              out += "<h3>"+teiToHtml(ch)+"</h3>";
+            }
             break;
           case "sp":
             out += '<p class="speech"><span class="speech-text">'+teiToHtml(ch)+'</span>'+
@@ -227,10 +235,10 @@
     }else{
       const act  = acts[actPicker.value];
       if(scenePicker.value === "all"){
-        showCast = actPicker.value === "0";
+        showCast = actPicker.value === "0"; /* show once for Act 1 when all scenes */
         html += teiToHtml(act);
       }else{
-        showCast = actPicker.value === "0";
+        showCast = actPicker.value === "0" && scenePicker.value === "0";
         const scenes = act.querySelectorAll('div[type="scene"]');
         const scene  = scenes[scenePicker.value];
         html += teiToHtml(scene);
