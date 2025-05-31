@@ -48,13 +48,16 @@
   const nextBtn     = document.getElementById("nextBtn");
 
   /* copy-to-clipboard buttons */
+  const announce = document.getElementById('announce');
   viewer.addEventListener('click',e=>{
-    if(e.target.classList.contains('copy-btn')){
-      const speech = e.target.closest('.speech').querySelector('.speech-text').innerText;
-      navigator.clipboard.writeText(speech)        // Clipboard API :contentReference[oaicite:1]{index=1}
+    const btn = e.target.closest('.copy-btn');
+    if(btn){
+      const speech = btn.closest('.speech').querySelector('.speech-text').innerText;
+      navigator.clipboard.writeText(speech)
         .then(()=>{
-          e.target.textContent = 'Copied!';
-          setTimeout(()=>{e.target.textContent='Copy';},1000);
+          btn.classList.add('copied');
+          announce.textContent = 'Copied!';
+          setTimeout(()=>btn.classList.remove('copied'),1000);
         });
     }
   });
@@ -131,7 +134,7 @@
 
           case "sp":  // speech block with copy button
             out += '<p class="speech"><span class="speech-text">'+teiToHtml(ch)+'</span>'+
-                   ' <button class="copy-btn" aria-label="Copy speech">Copy</button></p>';
+                   '<button class="copy-btn" aria-label="Copy"><svg class="icon copy"><use href="assets/icons.svg#copy"/></svg><svg class="icon check"><use href="assets/icons.svg#check"/></svg></button></p>';
             break;
 
           default:    out += teiToHtml(ch);
@@ -240,10 +243,22 @@
 
   /* --------------- main load ------------------ */
   async function loadPlay(file){
-    viewer.textContent = "Loading…";
+    viewer.textContent = 'Loading… 0 %';
     try{
-      const xml = await fetch(`XML/${file}`).then(r=>r.text());
-      currentDoc = parser.parseFromString(xml,"application/xml");
+      const res   = await fetch(`XML/${file}`);
+      const total = +res.headers.get('Content-Length') || 0;
+      const reader = res.body.getReader();
+      const chunks = [];
+      let loaded = 0;
+      while(true){
+        const {done, value} = await reader.read();
+        if(done) break;
+        chunks.push(value);
+        loaded += value.length;
+        if(total) viewer.textContent = `Loading… ${(loaded/total*100).toFixed(0)} %`;
+      }
+      const xml = await new Blob(chunks).text();
+      currentDoc = parser.parseFromString(xml, 'application/xml');
       const castList = currentDoc.querySelector("castList");
       castHtml = castList ? teiToHtml(castList) : "";
       populateActs(currentDoc);
@@ -263,5 +278,5 @@
     if(next) gotoScene(next);
   });
 
-  loadPlay(plays[0]); /* first view */
+
 
