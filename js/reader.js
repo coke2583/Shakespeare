@@ -43,6 +43,7 @@
   const d = typeof document === 'undefined' ? null : document;
   const actPicker   = d? d.createElement('select') : {value:'all'};
   const scenePicker = d? d.createElement('select') : {value:'all'};
+  const linePicker  = d? d.getElementById('linePicker') : {value:''};
   const viewer      = d? d.getElementById("viewer")  : {innerHTML:'',textContent:''};
   const castDiv     = d? d.getElementById("cast")    : {innerHTML:''};
   const nextBtn     = d? d.getElementById("nextBtn") : {style:{display:''}};
@@ -144,7 +145,12 @@
             break;
           case "pc":   out += ch.textContent;               break;
           case "c":    out += " ";                          break;
-          case "lb":   out += "<br>";                       break;
+          case "lb": {
+            const id = ch.getAttribute('xml:id') || '';
+            const n  = ch.getAttribute('n') || '';
+            out += `<br id="${id}" data-line="${n}">`;
+            break;
+          }
           case "l":    out += teiToHtml(ch)+"<br>";         break;
           case "p":    out += teiToHtml(ch)+"<br><br>";     break;
 
@@ -234,6 +240,20 @@
     renderSceneSegments();
   }
 
+  function populateLines(scene){
+    if(!linePicker) return;
+    linePicker.innerHTML = '';
+    linePicker.appendChild(new Option('Top',''));
+    if(scene){
+      scene.querySelectorAll('lb[n]').forEach(lb=>{
+        const n = lb.getAttribute('n');
+        const id = lb.getAttribute('xml:id');
+        if(n && id) linePicker.appendChild(new Option(n,id));
+      });
+    }
+    linePicker.value = '';
+  }
+
   /* --------------- render view ---------------- */
   function displayScene(){
     if(!currentDoc) return;
@@ -249,6 +269,7 @@
 
     const acts = currentDoc.querySelectorAll('body div[type="act"]');
     let html = "";
+    let currentScene = null;
 
     if(actPicker.value === "all"){
       acts.forEach(a=>{html += teiToHtml(a);});
@@ -257,13 +278,15 @@
       if(scenePicker.value === "all"){
         html += teiToHtml(act);
       }else{
-        const scene = act.querySelectorAll('div[type="scene"]')[scenePicker.value];
-        html += teiToHtml(scene);
+        currentScene = act.querySelectorAll('div[type="scene"]')[scenePicker.value];
+        html += teiToHtml(currentScene);
       }
     }
 
     viewer.innerHTML = html;
     castDiv.innerHTML = "";
+
+    populateLines(currentScene);
 
     nextBtn.style.display = (actPicker.value!=="all" && scenePicker.value!=="all" && getNextSceneIndices()) ? "" : "none";
     window.scrollTo(0,0);
@@ -416,6 +439,19 @@
     });
   }
 
+  if(linePicker && linePicker.addEventListener){
+    linePicker.addEventListener('change',()=>{
+      const id = linePicker.value;
+      closeSheet(contentsSheet);
+      if(id){
+        const el = document.getElementById(id);
+        if(el) el.scrollIntoView();
+      }else{
+        window.scrollTo(0,0);
+      }
+    });
+  }
+
   if(contentsSheet){
     contentsSheet.addEventListener('click',e=>{
       if(e.target===contentsSheet) closeSheet(contentsSheet);
@@ -435,7 +471,7 @@
   function openSheet(sheet){
     sheet.classList.add('open');
     contentsBtn.style.display = 'none';
-    const focusable = sheet.querySelector('input,button,li');
+    const focusable = sheet.querySelector('input,button,li,select');
     if(focusable) focusable.focus();
   }
 

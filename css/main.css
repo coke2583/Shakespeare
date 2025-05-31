@@ -177,6 +177,15 @@ main{padding:var(--space);}
   background:transparent;color:var(--fg);border-radius:var(--radius);
 }
 #contentsSheet .segmented button.active{background:var(--accent);color:var(--bg);}
+#linePicker{
+  width:100%;
+  padding:.5rem 1rem;
+  border-radius:var(--radius);
+  border:1px solid var(--accent-2);
+  background:var(--bg);
+  color:var(--fg);
+  margin-bottom:.5rem;
+}
 
 /* hide floating button when a sheet is open */
 .sheet.open ~ .contents-btn{display:none;}
