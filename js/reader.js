@@ -108,6 +108,18 @@
     }
   }
 
+  function hasFollowingSpace(node){
+    let next = node.nextSibling;
+    while(next){
+      if(next.nodeType===Node.TEXT_NODE && next.nodeValue.trim()===''){
+        next = next.nextSibling;
+        continue;
+      }
+      return next && (next.nodeName==='c' || next.nodeName==='lb' || next.nodeName==='l');
+    }
+    return false;
+  }
+
   function getLineText(el){
     return Array.from(el.childNodes).map(nodeText).join('').trim();
   }
@@ -197,9 +209,11 @@
         switch(ch.nodeName){
           case "w":
             out += `<span class="lookup" data-word="${ch.textContent}" data-line-id="${currentLineId}">${ch.textContent}</span>`;
+            if(!hasFollowingSpace(ch)) out += ' ';
             break;
           case "pc":
             out += `<span data-line-id="${currentLineId}">${ch.textContent}</span>`;
+            if(!hasFollowingSpace(ch)) out += ' ';
             break;
           case "c":    out += " ";                          break;
           case "lb": {
