@@ -147,8 +147,8 @@
             out += '<h2 class="act-title">Dramatis Personae</h2><ul>'+teiToHtml(ch)+"</ul><br>";
             break;
           case "castItem": {                                   // format character list
-            const name = ch.getElementsByTagName("role")[0];
-            const desc = ch.getElementsByTagName("roleDesc")[0];
+            const name = ch.querySelector("role");
+            const desc = ch.querySelector("roleDesc");
             const text = (name?teiToHtml(name).trim():"") +
                          (desc?" — "+teiToHtml(desc).trim():"");
             if(text.trim()) out += "<li>"+text+"</li>";
@@ -180,15 +180,13 @@
   /* ----------- populate acts/scenes ----------- */
   function populateActs(xml){
     actPicker.innerHTML = "";
-    const body = xml.getElementsByTagName('body')[0];
-    const acts = Array.from(body.getElementsByTagName('div'))
-                     .filter(d => d.getAttribute('type') === 'act');
+    const acts = xml.querySelectorAll('body div[type="act"]');
 
     const allActs = new Option("All Acts","all");
     actPicker.appendChild(allActs);
 
     acts.forEach((act,i)=>{
-      const head = act.getElementsByTagName("head")[0];
+      const head = act.querySelector("head");
       actPicker.appendChild(new Option(head?head.textContent.trim():`Act ${i+1}`,i));
     });
 
@@ -207,11 +205,9 @@
     scenePicker.appendChild(new Option("Characters","cast"));
     scenePicker.appendChild(new Option("All Scenes","all"));
 
-    const scenes = act ?
-      Array.from(act.getElementsByTagName('div')).filter(d => d.getAttribute('type') === 'scene') :
-      [];
+    const scenes = act?act.querySelectorAll('div[type="scene"]'):[];
     scenes.forEach((sc,i)=>{
-      const head = sc.getElementsByTagName("head")[0];
+      const head = sc.querySelector("head");
       scenePicker.appendChild(new Option(head?head.textContent.trim():`Scene ${i+1}`,i));
     });
     scenePicker.onchange = displayScene;
@@ -231,9 +227,7 @@
       return;
     }
 
-    const body = currentDoc.getElementsByTagName('body')[0];
-    const acts = Array.from(body.getElementsByTagName('div'))
-                     .filter(d => d.getAttribute('type') === 'act');
+    const acts = currentDoc.querySelectorAll('body div[type="act"]');
     let html = "";
 
     if(actPicker.value === "all"){
@@ -243,9 +237,7 @@
       if(scenePicker.value === "all"){
         html += teiToHtml(act);
       }else{
-        const scenes = Array.from(act.getElementsByTagName('div'))
-                           .filter(d => d.getAttribute('type') === 'scene');
-        const scene = scenes[scenePicker.value];
+        const scene = act.querySelectorAll('div[type="scene"]')[scenePicker.value];
         html += teiToHtml(scene);
       }
     }
@@ -259,29 +251,23 @@
 
   function getNextSceneIndices(){
     if(!currentDoc) return null;
-    const body = currentDoc.getElementsByTagName('body')[0];
-    const acts = Array.from(body.getElementsByTagName('div'))
-                     .filter(d => d.getAttribute('type') === 'act');
+    const acts = currentDoc.querySelectorAll('body div[type="act"]');
     let a = Number(actPicker.value);
     let s = Number(scenePicker.value);
     if(isNaN(a) || isNaN(s)) return null;
 
-    const scenes = Array.from(acts[a].getElementsByTagName('div'))
-                       .filter(d => d.getAttribute('type') === 'scene');
+    const scenes = acts[a].querySelectorAll('div[type="scene"]');
     if(s < scenes.length - 1) return {actIndex:a, sceneIndex:s+1};
 
     for(let nextA=a+1; nextA<acts.length; nextA++){
-      const nextScenes = Array.from(acts[nextA].getElementsByTagName('div'))
-                             .filter(d => d.getAttribute('type') === 'scene');
+      const nextScenes = acts[nextA].querySelectorAll('div[type="scene"]');
       if(nextScenes.length) return {actIndex:nextA, sceneIndex:0};
     }
     return null;
   }
 
   function gotoScene(indices){
-    const body = currentDoc.getElementsByTagName('body')[0];
-    const acts = Array.from(body.getElementsByTagName('div'))
-                     .filter(d => d.getAttribute('type') === 'act');
+    const acts = currentDoc.querySelectorAll('body div[type="act"]');
     actPicker.value = indices.actIndex;
     populateScenes(acts[indices.actIndex]);
     scenePicker.value = indices.sceneIndex;
@@ -335,7 +321,7 @@
       }
       const xml = await new Blob(chunks).text();
       currentDoc = parser.parseFromString(xml, 'application/xml');
-      const castList = currentDoc.getElementsByTagName("castList")[0];
+      const castList = currentDoc.querySelector("castList");
       castHtml = castList ? teiToHtml(castList) : "";
       populateActs(currentDoc);
       displayScene();
