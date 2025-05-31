@@ -3,60 +3,50 @@ import { plays } from './reader.js';
 
 const parser = new DOMParser();
 
-/* Build one big pool of random sentences taken from a random play */
-async function buildQuotePool() {
-  const file = plays[Math.floor(Math.random() * plays.length)];
-  const res  = await fetch(`XML/${file}`);                    // fetch XML :contentReference[oaicite:0]{index=0}
-  const xml  = await res.text();
-  const doc  = parser.parseFromString(xml, 'application/xml'); // DOMParser :contentReference[oaicite:1]{index=1}
-
-  const quotes = [];
-  doc.querySelectorAll('l, p').forEach(el => {
-    const text = el.textContent.trim().replace(/\s+/g, ' ');
-    text.split(/(?<=[.!?])\s+/).forEach(sent => {
-      const s = sent.trim();
-      if (s && s.length > 20 && s.length <= 120) quotes.push(s);
-    });
+async function buildQuotePool(){
+  const random = plays[Math.floor(Math.random()*plays.length)];
+  const xml = await fetch(`XML/${random}`).then(r=>r.text());
+  const doc = parser.parseFromString(xml,'application/xml');
+  const sentences=[];
+  doc.querySelectorAll('l,p').forEach(el=>{
+    el.textContent.trim()
+      .replace(/\s+/g,' ')
+      .split(/(?<=[.!?])\s+/)
+      .forEach(s=>{
+        const t=s.trim();
+        if(t.length>20 && t.length<=120) sentences.push(t);
+      });
   });
-
-  /* Fisher-Yates shuffle */                                   // shuffle algo :contentReference[oaicite:2]{index=2}
-  for (let i = quotes.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [quotes[i], quotes[j]] = [quotes[j], quotes[i]];
-  }
-
-  return quotes.slice(0, 200);
+  sentences.sort(()=>Math.random()-0.5);
+  return sentences.slice(0,400);
 }
-
-/* Re-use the pool for the whole tab session */
-const cachedQuotes = JSON.parse(sessionStorage.getItem('quotePool') || 'null');
-const quotePool    = cachedQuotes || await buildQuotePool();
-if (!cachedQuotes) sessionStorage.setItem('quotePool', JSON.stringify(quotePool));
+const pool = JSON.parse(sessionStorage.getItem('quotePool')||'null') 
+             || await buildQuotePool();
+sessionStorage.setItem('quotePool',JSON.stringify(pool));
 
 /* ---------- background “book page” wall ---------- */
-const container   = document.querySelector('.quote-stream');
-const wallEls     = [];
-const WALL_COUNT  = 40;
-
-for (let i = 0; i < WALL_COUNT; i++) {
-  const span = document.createElement('span');
-  span.className   = 'quote-line';
-  span.textContent = quotePool[Math.floor(Math.random() * quotePool.length)];
-  container.appendChild(span);
-  wallEls.push(span);
+const WALL = 40;
+const box  = document.querySelector('.quote-stream');
+const els  = [];
+for(let i=0;i<WALL;i++){
+  const span=document.createElement('span');
+  span.className='quote-line';
+  span.textContent=pool[Math.floor(Math.random()*pool.length)];
+  span.style.animationDelay=`${Math.random()*30}s`;
+  box.append(span);
+  els.push(span);
 }
 
 /* swap a single line every 4 s for subtle motion */
-function swapLine() {
-  const el     = wallEls[Math.floor(Math.random() * wallEls.length)];
-  const quote  = quotePool[Math.floor(Math.random() * quotePool.length)];
-  el.style.opacity = '0';
-  setTimeout(() => {
-    el.textContent = quote;
-    el.style.opacity = '.1';
-  }, 500);
-}
-setInterval(swapLine, 4000);
+setInterval(()=>{
+  const el   = els[Math.floor(Math.random()*els.length)];
+  const next = pool[Math.floor(Math.random()*pool.length)];
+  el.style.opacity='0';
+  setTimeout(()=>{
+    el.textContent=next;
+    el.style.opacity='.12';
+  },500);
+},4000);
 
 /* fade-in helper for hero elements */
 const io = new IntersectionObserver((entries, ob) => {
@@ -74,12 +64,12 @@ const quoteEl   = document.getElementById('rotating-quote');
 let quoteIndex  = 0;
 
 function showNextQuote() {
-  if (!quotePool.length) return;
+  if (!pool.length) return;
   quoteEl.classList.remove('visible');
   setTimeout(() => {
-    quoteEl.textContent = quotePool[quoteIndex];
+    quoteEl.textContent = pool[quoteIndex];
     quoteEl.classList.add('visible');
-    quoteIndex = (quoteIndex + 1) % quotePool.length;
+    quoteIndex = (quoteIndex + 1) % pool.length;
   }, 500);
 }
 showNextQuote();
