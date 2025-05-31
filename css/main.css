@@ -95,27 +95,22 @@ h2{font-size:clamp(1.5rem,1vw + 1rem,2.25rem);font-weight:700;}
 .quote-stream{
   position:absolute;
   inset:0;
-  display:flex;
-  flex-direction:column;
-  gap:.25rem;
-  justify-content:center;     /* vertical centre */
-  align-items:center;          /* horizontal centre */
-  overflow:hidden;             /* clip long lines */
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(20ch,1fr));
+  gap:.5rem;
+  padding:2rem;
+  overflow:hidden;
   pointer-events:none;
 }
 
 .quote-line{
-  opacity:.08;
+  opacity:.1;
+  color:var(--accent-2);
   font-family:'Playfair Display',serif;
   font-size:clamp(.8rem,.6rem + .6vw,1.1rem);
+  line-height:1.4;
   mix-blend-mode:luminosity;
-  animation:scrollFade 30s infinite;
-}
-
-@keyframes scrollFade{
-  0%   {opacity:0;  transform:translateY(2rem);}
-  10%,90%{opacity:.12;}
-  100% {opacity:0;  transform:translateY(-2rem);}
+  transition:opacity .5s;
 }
 .ghost-container{position:absolute;inset:0;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,1fr);pointer-events:none;}
 @keyframes fadeInOut{0%,80%{opacity:0}15%,65%{opacity:.15}}
