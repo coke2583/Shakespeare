@@ -1,3 +1,5 @@
+import { teiToHtml, nodeText, getLineText } from './formatting.js';
+
   /* ------------ available files ---------------- */
   export const plays = [
     "alls-well-that-ends-well_TEIsimple_FolgerShakespeare.xml",
@@ -64,7 +66,6 @@
   /* cached lines for search */
   let lines = [];
   const lineNodes = new Map();
-  let currentLineId = '';
 
   /* copy-to-clipboard buttons */
   const announce = d? d.getElementById('announce') : {textContent:''};
@@ -98,39 +99,6 @@
   let   currentDoc  = null;
   let   castHtml    = "";
 
-  function nodeText(n){
-    if(n.nodeType===Node.TEXT_NODE) return n.nodeValue;
-    switch(n.nodeName){
-      case 'w':
-      case 'pc': return n.textContent;
-      case 'c':  return ' ';
-      default:   return Array.from(n.childNodes).map(nodeText).join('');
-    }
-  }
-
-  function hasFollowingSpace(node){
-    let next = node.nextSibling;
-    while(next){
-      if(next.nodeType===Node.TEXT_NODE && next.nodeValue.trim()===''){
-        next = next.nextSibling;
-        continue;
-      }
-      return next && (next.nodeName==='c' || next.nodeName==='lb' || next.nodeName==='l');
-    }
-    return false;
-  }
-
-  function needsSpace(node){
-    let nxt = node.nextSibling;
-    while(nxt && nxt.nodeType === Node.TEXT_NODE && !/\S/.test(nxt.nodeValue)){
-      nxt = nxt.nextSibling;
-    }
-    return nxt && nxt.nodeName === 'w';
-  }
-
-  function getLineText(el){
-    return Array.from(el.childNodes).map(nodeText).join('').trim();
-  }
 
   function extractLines(xml){
     lines = [];
@@ -197,107 +165,6 @@
     });
   }
 
-  function nextTokenIsWord(node){
-    let nxt = node.nextSibling;
-    while(nxt && nxt.nodeType===Node.TEXT_NODE && nxt.nodeValue.trim()===''){
-      nxt = nxt.nextSibling;
-    }
-    return nxt && nxt.nodeName === 'w';
-  }
-
-  /* ------------- TEI → HTML ------------------- */
-  function teiToHtml(node){
-    if(!node) return "";
-    let out = "";
-    node.childNodes.forEach(ch=>{
-      if(ch.nodeType === Node.TEXT_NODE){
-        /* preserve significant spaces, ignore purely formatting whitespace */
-        let text = ch.nodeValue;
-        if(text.trim() === '') return;
-        const startSpace = /^\s/.test(text);
-        const endSpace   = /\s$/.test(text);
-        text = text.trim().replace(/\s+/g,' ');
-        if(startSpace) out += ' ';
-        out += text;
-        if(endSpace)   out += ' ';
-      }else{
-        switch(ch.nodeName){
-          case "w":
-            out += `<span class="lookup" data-word="${ch.textContent}" data-line-id="${currentLineId}">${ch.textContent}</span>`;
-            if(needsSpace(ch)) out += ' ';
-            if(!hasFollowingSpace(ch)) out += ' ';
-            break;
-          case "pc":
-            out += `<span data-line-id="${currentLineId}">${ch.textContent}</span>`;
-            if(!hasFollowingSpace(ch)) out += ' ';
-            break;
-          case "c":    out += " ";                          break;
-          case "lb": {
-            const id = ch.getAttribute('xml:id') || '';
-            const n  = ch.getAttribute('n') || '';
-            out += `<br id="${id}" data-line="${n}">`;
-            currentLineId = id;
-            break;
-          }
-          case "l": {
-            const prev = currentLineId;
-            const id = ch.getAttribute('xml:id') || '';
-            const n  = ch.getAttribute('n') || '';
-            currentLineId = id;
-            ch.childNodes.forEach(c=>{ out += teiToHtml(c); });
-            out += `<br id="${id}" data-line="${n}">`;
-            currentLineId = prev;
-            break;
-          }
-
-          case "p":    out += teiToHtml(ch)+"<br><br>";     break;
-
-          case "speaker": { // speaker then optional stage direction on the same line
-            out += "<strong>"+teiToHtml(ch)+"</strong>";
-            let next = ch.nextElementSibling;
-            while(next && next.nodeType!==1){next = next.nextSibling;}
-            if(next && next.nodeName==="stage"){
-              out += " ";
-            }else{
-              out += "<br>";
-            }
-            break;
-          }
-          case "stage":   out += "<em>"+teiToHtml(ch)+"</em><br>";  break;
-
-          case "castList":
-            out += '<h2 class="act-title">Dramatis Personae</h2><ul>'+teiToHtml(ch)+"</ul><br>";
-            break;
-          case "castItem": {                                   // format character list
-            const name = ch.querySelector("role");
-            const desc = ch.querySelector("roleDesc");
-            const text = (name?teiToHtml(name).trim():"") +
-                         (desc?" — "+teiToHtml(desc).trim():"");
-            if(text.trim()) out += "<li>"+text+"</li>";
-            break;
-          }
-          case "head":
-            if(ch.parentNode && ch.parentNode.nodeName==="castGroup"){
-              out += "<li><strong>"+teiToHtml(ch)+"</strong></li>";
-            }else{
-              out += '<h3 class="scene-title">'+teiToHtml(ch)+"</h3>";
-            }
-            break;
-
-          case "sp":  // speech block with copy button
-            out += '<p class="speech"><span class="speech-text">'+teiToHtml(ch)+'</span>'+
-                   '<button class="copy-btn" aria-label="Copy">'+
-                     '<img class="icon copy" src="assets/copyIcon.png" alt="">'+
-                     '<img class="icon check" src="assets/tick.png" alt="">'+
-                   '</button></p>';
-            break;
-
-          default:    out += teiToHtml(ch);
-        }
-      }
-    });
-    return out;
-  }
 
   /* ----------- populate acts/scenes ----------- */
   function populateActs(xml){
