@@ -24,8 +24,14 @@
   <div id="viewer" aria-live="polite"></div>
   <button id="nextBtn" style="display:none">Next Scene →</button>
   <div id="announce" class="visually-hidden" aria-live="polite"></div>
-  <div id="playSheet" class="sheet" role="dialog" aria-label="Choose a play"></div>
+
+  <!-- merged bottom-sheet play menu -->
+  <div id="playSheet" class="sheet" role="dialog" aria-label="Choose a play">
+    <ul></ul>
+  </div>
 </main>
+
+<!-- copy / check icons -->
 <svg style="display:none" aria-hidden="true">
   <symbol id="copy" viewBox="0 0 24 24">
     <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 18H8V7h11v16z"/>
@@ -34,6 +40,7 @@
     <path d="M9 16.2l-3.5-3.5-1.4 1.4L9 19l12-12-1.4-1.4z"/>
   </symbol>
 </svg>
+
 <script type="module" src="js/reader.js"></script>
 </body>
 </html>
