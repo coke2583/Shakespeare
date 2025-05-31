@@ -40,69 +40,87 @@
   ];
 
   /* ------------ element handles --------------- */
-  const playPicker  = document.getElementById("playPicker");
-  const actPicker   = document.getElementById("actPicker");
-  const scenePicker = document.getElementById("scenePicker");
-  const viewer      = document.getElementById("viewer");
-  const castDiv     = document.getElementById("cast");
-  const nextBtn     = document.getElementById("nextBtn");
-  const playSheet   = document.getElementById('playSheet');
-  const sheetList   = playSheet.querySelector('ul');
+  const d = typeof document === 'undefined' ? null : document;
+  const actPicker   = d? d.createElement('select') : {value:'all'};
+  const scenePicker = d? d.createElement('select') : {value:'all'};
+  const viewer      = d? d.getElementById("viewer")  : {innerHTML:'',textContent:''};
+  const castDiv     = d? d.getElementById("cast")    : {innerHTML:''};
+  const nextBtn     = d? d.getElementById("nextBtn") : {style:{display:''}};
+  const playSheet   = d? d.getElementById('playSheet') : null;
+  const playSearch  = playSheet? playSheet.querySelector('input[type=search]') : null;
+  const sheetList   = playSheet? playSheet.querySelector('ul') : null;
+  const contentsSheet = d? d.getElementById('contentsSheet') : null;
+  const actCtrl     = d? d.getElementById('actCtrl') : null;
+  const sceneCtrl   = d? d.getElementById('sceneCtrl') : null;
+  const contentsBtn = d? d.querySelector('.contents-btn') : {style:{}};
+  if(contentsBtn.style) contentsBtn.style.display = 'none';
+  const header      = d? d.querySelector('header') : null;
 
   /* copy-to-clipboard buttons */
-  const announce = document.getElementById('announce');
+  const announce = d? d.getElementById('announce') : {textContent:''};
   const defs = new Map();
-  viewer.addEventListener('click',async e=>{
-    const btn = e.target.closest('.copy-btn');
-    if(btn){
-      const speech = btn.closest('.speech').querySelector('.speech-text').innerText;
-      navigator.clipboard.writeText(speech)
-        .then(()=>{
-          btn.classList.add('copied');
-          announce.textContent = 'Copied!';
-          setTimeout(()=>btn.classList.remove('copied'),1000);
-        });
-      return;
-    }
+  if(viewer.addEventListener){
+    viewer.addEventListener('click',async e=>{
+      const btn = e.target.closest('.copy-btn');
+      if(btn){
+        const speech = btn.closest('.speech').querySelector('.speech-text').innerText;
+        navigator.clipboard.writeText(speech)
+          .then(()=>{
+            btn.classList.add('copied');
+            announce.textContent = 'Copied!';
+            setTimeout(()=>btn.classList.remove('copied'),1000);
+          });
+        return;
+      }
 
-    const w = e.target.closest('.lookup');
-    if(w){
-      const word = w.dataset.word.toLowerCase();
-      const cached = defs.get(word) || await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`)
-                            .then(r=>r.json()).catch(()=>null);
-      if(!defs.has(word) && cached) defs.set(word,cached);
-      showTooltip(e.clientX,e.clientY,getDefinitionText(cached));
-    }
-  });
+      const w = e.target.closest('.lookup');
+      if(w){
+        const word = w.dataset.word.toLowerCase();
+        const cached = defs.get(word) || await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`)
+                              .then(r=>r.json()).catch(()=>null);
+        if(!defs.has(word) && cached) defs.set(word,cached);
+        showTooltip(e.clientX,e.clientY,getDefinitionText(cached));
+      }
+    });
+  }
 
-  const parser      = new DOMParser();
+  const parser      = (typeof DOMParser==='undefined') ? {parseFromString:()=>null} : new DOMParser();
   let   currentDoc  = null;
   let   castHtml    = "";
 
   /* ----------- populate play list ------------- */
-  plays.forEach(f=>{
-    const title = f.replace(/_TEIsimple_FolgerShakespeare\.xml$/,"")
-                    .replace(/-/g," ")
-                    .replace(/\b\w/g,c=>c.toUpperCase());
-    const o = document.createElement("option");
-    o.value = f;
-    o.textContent = title;
-    playPicker.appendChild(o);
+  if(playSheet && sheetList){
+    plays.forEach(f=>{
+      const title = f.replace(/_TEIsimple_FolgerShakespeare\.xml$/,"")
+                      .replace(/-/g," ")
+                      .replace(/\b\w/g,c=>c.toUpperCase());
+      const li = document.createElement('li');
+      li.dataset.file = f;
+      li.textContent = title;
+      sheetList.appendChild(li);
+    });
 
-    const li = document.createElement('li');
-    li.dataset.file = f;
-    li.textContent = title;
-    sheetList.appendChild(li);
-  });
+    openSheet(playSheet);
 
-  playSheet.classList.add('open');
+    playSearch.addEventListener('input',()=>{
+      const term = playSearch.value.toLowerCase();
+      sheetList.querySelectorAll('li').forEach(li=>{
+        li.style.display = li.textContent.toLowerCase().includes(term) ? '' : 'none';
+      });
+    });
 
-  sheetList.addEventListener('click',e=>{
-    const li = e.target.closest('li');
-    if(!li) return;
-    playSheet.classList.remove('open');
-    loadPlay(li.dataset.file);
-  });
+    sheetList.addEventListener('click',e=>{
+      const li = e.target.closest('li');
+      if(!li) return;
+      closeSheet(playSheet);
+      loadPlay(li.dataset.file);
+    });
+
+    playSheet.addEventListener('click',e=>{
+      if(e.target===playSheet) closeSheet(playSheet);
+    });
+  }
+
 
   /* ------------- TEI → HTML ------------------- */
   function teiToHtml(node){
@@ -197,6 +215,7 @@
     };
     actPicker.value = "all";
     populateScenes(null);
+    renderActSegments();
   }
 
   function populateScenes(act){
@@ -212,6 +231,7 @@
     });
     scenePicker.onchange = displayScene;
     scenePicker.value = "all";
+    renderSceneSegments();
   }
 
   /* --------------- render view ---------------- */
@@ -274,6 +294,35 @@
     displayScene();
   }
 
+  function renderActSegments(){
+    actCtrl.innerHTML = '';
+    const btnAll = document.createElement('button');
+    btnAll.textContent = 'All Acts';
+    btnAll.dataset.value = 'all';
+    if(actPicker.value === 'all') btnAll.classList.add('active');
+    actCtrl.appendChild(btnAll);
+    const acts = currentDoc.querySelectorAll('body div[type="act"]');
+    acts.forEach((act,i)=>{
+      const head = act.querySelector('head');
+      const btn = document.createElement('button');
+      btn.dataset.value = i;
+      btn.textContent = head?head.textContent.trim():`Act ${i+1}`;
+      if(actPicker.value == i) btn.classList.add('active');
+      actCtrl.appendChild(btn);
+    });
+  }
+
+  function renderSceneSegments(){
+    sceneCtrl.innerHTML = '';
+    Array.from(scenePicker.options).forEach(opt=>{
+      const btn = document.createElement('button');
+      btn.dataset.value = opt.value;
+      btn.textContent = opt.textContent;
+      if(scenePicker.value === opt.value) btn.classList.add('active');
+      sceneCtrl.appendChild(btn);
+    });
+  }
+
   function getDefinitionText(data){
     if(!Array.isArray(data) || !data.length) return 'No definition found.';
     const entry = data[0];
@@ -301,6 +350,7 @@
 
   /* --------------- main load ------------------ */
   async function loadPlay(file){
+    contentsBtn.style.display = 'none';
     viewer.textContent = 'Loading… 0 %';
     try{
       const res   = await fetch(`XML/${file}`);
@@ -325,6 +375,7 @@
       castHtml = castList ? teiToHtml(castList) : "";
       populateActs(currentDoc);
       displayScene();
+      contentsBtn.style.display = '';
     }catch(e){
       viewer.textContent = "❌ "+e;
       console.error(e);
@@ -332,13 +383,67 @@
   }
 
   /* -------------- wire-up --------------------- */
-  document.getElementById("loadBtn")
-          .addEventListener("click",()=>loadPlay(playPicker.value));
+  if(nextBtn.addEventListener){
+    nextBtn.addEventListener('click',()=>{
+      const next = getNextSceneIndices();
+      if(next) gotoScene(next);
+    });
+  }
 
-  nextBtn.addEventListener('click',()=>{
-    const next = getNextSceneIndices();
-    if(next) gotoScene(next);
-  });
+  if(contentsBtn.addEventListener){
+    contentsBtn.addEventListener('click',()=>openSheet(contentsSheet));
+  }
+
+  if(actCtrl){
+    actCtrl.addEventListener('click',e=>{
+      const b = e.target.closest('button');
+      if(!b) return;
+      actPicker.value = b.dataset.value;
+      const acts = currentDoc.querySelectorAll('body div[type="act"]');
+      const val = actPicker.value === 'all' ? null : acts[actPicker.value];
+      populateScenes(val);
+      renderActSegments();
+    });
+  }
+
+  if(sceneCtrl){
+    sceneCtrl.addEventListener('click',e=>{
+      const b = e.target.closest('button');
+      if(!b) return;
+      scenePicker.value = b.dataset.value;
+      renderSceneSegments();
+      closeSheet(contentsSheet);
+    });
+  }
+
+  if(contentsSheet){
+    contentsSheet.addEventListener('click',e=>{
+      if(e.target===contentsSheet) closeSheet(contentsSheet);
+    });
+  }
+
+  if(typeof window!=='undefined'){
+    window.addEventListener('scroll',()=>{
+      if(scrollY>80 && header && !header.classList.contains('compact')){
+        header.classList.add('compact');
+      }else if(scrollY<=80 && header && header.classList.contains('compact')){
+        header.classList.remove('compact');
+      }
+    });
+  }
+
+  function openSheet(sheet){
+    sheet.classList.add('open');
+    contentsBtn.style.display = 'none';
+    const focusable = sheet.querySelector('input,button,li');
+    if(focusable) focusable.focus();
+  }
+
+  function closeSheet(sheet){
+    sheet.classList.remove('open');
+    if(sheet===contentsSheet) displayScene();
+    contentsBtn.style.display = '';
+  }
 
 
 
