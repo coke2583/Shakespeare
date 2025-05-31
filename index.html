@@ -126,7 +126,12 @@
     let out = "";
     node.childNodes.forEach(ch=>{
       if(ch.nodeType === Node.TEXT_NODE){
-        out += ch.nodeValue.trim();
+        const text = ch.nodeValue;
+        if(text.trim()){
+          if(/^\s/.test(text)) out += ' ';
+          out += text.trim();
+          if(/\s$/.test(text)) out += ' ';
+        }
       }else{
         switch(ch.nodeName){
           case "w":
@@ -146,7 +151,7 @@
             out += teiToHtml(ch)+"<br><br>";
             break;
           case "speaker":
-            out += "<strong>"+teiToHtml(ch)+"</strong> ";
+            out += "<strong>"+teiToHtml(ch)+"</strong><br>";
             break;
           case "stage":
             out += "<em>"+teiToHtml(ch)+"</em><br>";
