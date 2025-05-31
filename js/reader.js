@@ -216,11 +216,19 @@
         switch(ch.nodeName){
           case "w":
             out += `<span class="lookup" data-word="${ch.textContent}" data-line-id="${currentLineId}">${ch.textContent}</span>`;
+
             if(!hasFollowingSpace(ch) && nextTokenIsWord(ch)) out += ' ';
             break;
           case "pc":
             out += `<span data-line-id="${currentLineId}">${ch.textContent}</span>`;
             /* never append implicit space after punctuation */
+
+            if(!hasFollowingSpace(ch)) out += ' ';
+            break;
+          case "pc":
+            out += `<span data-line-id="${currentLineId}">${ch.textContent}</span>`;
+            if(!hasFollowingSpace(ch)) out += ' ';
+
             break;
           case "c":    out += " ";                          break;
           case "lb": {
