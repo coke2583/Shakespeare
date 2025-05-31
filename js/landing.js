@@ -2,44 +2,59 @@ import { plays } from './reader.js';
 
 const parser = new DOMParser();
 
-// Build a random pool of XML lines
-async function buildLinePool() {
+async function buildQuotePool() {
   const file = plays[Math.floor(Math.random() * plays.length)];
   const res  = await fetch(`XML/${file}`);
   const xml  = await res.text();
   const doc  = parser.parseFromString(xml, 'application/xml');
 
-  const lines = [];
+  const quotes = [];
   doc.querySelectorAll('l, p').forEach(el => {
     const text = el.textContent.trim().replace(/\s+/g, ' ');
-    if (text.length > 40) lines.push(text);
+    text.split(/(?<=[.!?])\s+/).forEach(sent => {
+      const s = sent.trim();
+      if (s && s.length > 20 && s.length <= 120) quotes.push(s);
+    });
   });
 
-  // Fisher-Yates shuffle
-  for (let i = lines.length - 1; i > 0; i--) {
+  for (let i = quotes.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [lines[i], lines[j]] = [lines[j], lines[i]];
+    [quotes[i], quotes[j]] = [quotes[j], quotes[i]];
   }
 
-  return lines.slice(0, 20);
+  return quotes.slice(0, 200);
 }
 
-// Re-use the pool for the rest of the tab session
-const cached   = JSON.parse(sessionStorage.getItem('quotes') || 'null');
-const linePool = cached || await buildLinePool();
-if (!cached) sessionStorage.setItem('quotes', JSON.stringify(linePool));
+const cached = JSON.parse(sessionStorage.getItem('quotes') || 'null');
+const quotePool = cached || await buildQuotePool();
+if (!cached) sessionStorage.setItem('quotes', JSON.stringify(quotePool));
 
+/* ----------- background quote wall ----------- */
 const container = document.querySelector('.quote-stream');
+const wallEls = [];
+const WALL_COUNT = 40;
 
-linePool.forEach((text, i) => {
+for (let i = 0; i < WALL_COUNT; i++) {
   const span = document.createElement('span');
-  span.className = 'quote-line fade-in';      // fade-in watched by IO
-  span.textContent = text;
-  span.style.animationDelay = `${i * 3 + Math.random() * 1.5}s`;
+  span.className = 'quote-line';
+  span.textContent = quotePool[Math.floor(Math.random() * quotePool.length)];
   container.appendChild(span);
-});
+  wallEls.push(span);
+}
 
-// Reveal each span once it scrolls into view
+function swapLine() {
+  const el = wallEls[Math.floor(Math.random() * wallEls.length)];
+  const quote = quotePool[Math.floor(Math.random() * quotePool.length)];
+  el.style.opacity = '0';
+  setTimeout(() => {
+    el.textContent = quote;
+    el.style.opacity = '0.1';
+  }, 500);
+}
+
+setInterval(swapLine, 4000);
+
+/* fade in hero text */
 const io = new IntersectionObserver((entries, ob) => {
   entries.forEach(e => {
     if (e.isIntersecting) {
@@ -50,3 +65,20 @@ const io = new IntersectionObserver((entries, ob) => {
 }, { threshold: 0.2 });
 
 document.querySelectorAll('.fade-in').forEach(el => io.observe(el));
+
+/* ----------- rotating quote ----------- */
+const quoteEl = document.getElementById('rotating-quote');
+let rotateIndex = 0;
+
+function showNextQuote() {
+  if (!quotePool.length) return;
+  quoteEl.classList.remove('visible');
+  setTimeout(() => {
+    quoteEl.textContent = quotePool[rotateIndex];
+    quoteEl.classList.add('visible');
+    rotateIndex = (rotateIndex + 1) % quotePool.length;
+  }, 500);
+}
+
+showNextQuote();
+setInterval(showNextQuote, 6000);
