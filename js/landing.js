@@ -11,15 +11,11 @@ const quotes=[
   'Cry havoc and let slip the dogs of war'
 ];
 
-const container=document.querySelector('.ghost-container');
-const cells=Array.from({length:16},(_,i)=>i);
-quotes.slice(0,10).forEach(q=>{
+const container=document.querySelector('.quote-stream');
+quotes.forEach(q=>{
   const span=document.createElement('span');
   span.className='ghost';
   span.textContent=q;
-  const i=cells.splice(Math.floor(Math.random()*cells.length),1)[0];
-  span.style.gridColumn=(i%4)+1;
-  span.style.gridRow=Math.floor(i/4)+1;
   container.appendChild(span);
 });
 
