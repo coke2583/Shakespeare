@@ -157,6 +157,6 @@ main{padding:var(--space);}
   z-index:1000;
 }
 
-.lookup{cursor:help;border-bottom:1px dotted var(--accent-2);}
+.lookup{cursor:help;}
 
 .act-title,.scene-title{font-family:'Playfair Display',serif;}
