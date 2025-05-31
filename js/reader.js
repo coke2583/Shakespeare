@@ -220,10 +220,6 @@
             break;
           }
 
-            break;
-          }
-          case "l":    out += teiToHtml(ch)+"<br>";         break;
-
           case "p":    out += teiToHtml(ch)+"<br><br>";     break;
 
           case "speaker": {                                 // speaker then optional stage dir on same line :contentReference[oaicite:3]{index=3}
@@ -317,15 +313,9 @@
     linePicker.innerHTML = '';
     linePicker.appendChild(new Option('Top',''));
     if(scene){
-
       scene.querySelectorAll('lb[n], l[n]').forEach(el=>{
         const n = el.getAttribute('n');
         const id = el.getAttribute('xml:id');
-
-      scene.querySelectorAll('lb[n]').forEach(lb=>{
-        const n = lb.getAttribute('n');
-        const id = lb.getAttribute('xml:id');
-
         if(n && id) linePicker.appendChild(new Option(n,id));
       });
     }
