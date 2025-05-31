@@ -225,6 +225,7 @@
           case "w":
             out += `<span class="lookup" data-word="${ch.textContent}" data-line-id="${currentLineId}">${ch.textContent}</span>`;
             if(needsSpace(ch)) out += ' ';
+            if(!hasFollowingSpace(ch)) out += ' ';
             break;
           case "pc":
             out += `<span data-line-id="${currentLineId}">${ch.textContent}</span>`;
