@@ -76,3 +76,16 @@ h2{font-size:clamp(1.5rem,1vw + 1rem,2.25rem);font-weight:700;}
 @media(min-width:80rem){
   main{padding:3rem;}
 }
+
+.home-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  background:var(--accent);
+  color:var(--bg);
+  text-decoration:none;
+  font-size:1.5rem;
+}
