@@ -48,6 +48,22 @@ h2{font-size:clamp(1.5rem,1vw + 1rem,2.25rem);font-weight:700;}
   font-size:1.25rem;
   text-decoration:none;
 }
+
+.rotating-quote{
+  position:absolute;
+  bottom:2rem;
+  left:50%;
+  transform:translateX(-50%);
+  max-width:80%;
+  font-family:'Playfair Display',serif;
+  font-size:clamp(1rem,.8rem + 1vw,1.5rem);
+  color:var(--accent-2);
+  opacity:0;
+  transition:opacity .5s;
+  pointer-events:none;
+}
+
+.rotating-quote.visible{opacity:.5;}
 .controls label{margin-right:0.5rem;display:inline-block;margin-bottom:1rem;}
 #viewer{white-space:pre-wrap;}
 .speech{position:relative;margin-bottom:var(--space);}
