@@ -45,8 +45,8 @@
   const scenePicker = d? d.createElement('select') : {value:'all'};
   const linePicker  = d? d.getElementById('linePicker') : {value:''};
   const searchSheet = d? d.getElementById('searchSheet') : null;
-  const searchInput = searchSheet? searchSheet.querySelector('input[type=search]') : null;
-  const searchList  = searchSheet? searchSheet.querySelector('ul') : null;
+  const searchInput = searchSheet ? searchSheet.querySelector('input[type=search]') : null;
+  const searchList  = searchSheet ? searchSheet.querySelector('ul') : null;
   const searchBtn   = d? d.querySelector('.search-btn') : {style:{display:'none'}};
   const viewer      = d? d.getElementById("viewer")  : {innerHTML:'',textContent:''};
   const castDiv     = d? d.getElementById("cast")    : {innerHTML:''};
@@ -243,7 +243,7 @@
 
           case "p":    out += teiToHtml(ch)+"<br><br>";     break;
 
-          case "speaker": {                                 // speaker then optional stage dir on same line :contentReference[oaicite:3]{index=3}
+          case "speaker": { // speaker then optional stage direction on the same line
             out += "<strong>"+teiToHtml(ch)+"</strong>";
             let next = ch.nextElementSibling;
             while(next && next.nodeType!==1){next = next.nextSibling;}
