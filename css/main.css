@@ -107,6 +107,7 @@ h2{font-size:clamp(1.5rem,1vw + 1rem,2.25rem);font-weight:700;}
 .ghost.revealed{opacity:0.2;}
 .visually-hidden{position:absolute;left:-9999px}
 .word{cursor:help;}
+main{padding:var(--space);}
 @media(min-width:48rem){
   main{padding:2rem;}
 }
