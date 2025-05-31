@@ -7,21 +7,23 @@
   <!-- Inlined favicon to avoid 404 requests -->
   <link rel="icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/5cAAwMCAKP3IboAAAAASUVORK5CYII="/>
 
+  <!-- External CSS -->
   <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
   <h1>Shakespeare Reader</h1>
 
-  <label>Play: <select id="playPicker"></select></label>
+  <label>Play:  <select id="playPicker"></select></label>
   <button id="loadBtn">Load</button><br>
 
-  <label>Act: <select id="actPicker"></select></label>
+  <label>Act:   <select id="actPicker"></select></label>
   <label>Scene: <select id="scenePicker"></select></label>
 
   <div id="cast"></div>
   <div id="viewer">Loading…</div>
   <button id="nextBtn" style="display:none">Next Scene →</button>
 
+  <!-- External JavaScript -->
   <script src="js/main.js"></script>
 </body>
 </html>
