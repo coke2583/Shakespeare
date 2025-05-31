@@ -1,0 +1,14 @@
+body{
+  font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+  line-height:1.5;
+  margin:1rem;
+  max-width:45rem;
+  background:#000;
+  color:#fff;
+}
+select{font-size:1rem;margin:0 0 1rem 0}
+#viewer{white-space:pre-wrap}
+.speech{position:relative;}
+.copy-btn{margin-left:.5rem;font-size:.8rem;}
+#cast h3{font-size:1rem;margin:0;}
+
