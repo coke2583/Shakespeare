@@ -108,24 +108,12 @@
     }
   }
 
-  function hasFollowingSpace(node){
-    let next = node.nextSibling;
-    while(next){
-      if(next.nodeType===Node.TEXT_NODE && next.nodeValue.trim()===''){
-        next = next.nextSibling;
-        continue;
-      }
-      return next && (next.nodeName==='c' || next.nodeName==='lb' || next.nodeName==='l');
-    }
-    return false;
-  }
-
-  function needsSpace(node){
+  function nextTagName(node){
     let nxt = node.nextSibling;
     while(nxt && nxt.nodeType === Node.TEXT_NODE && !/\S/.test(nxt.nodeValue)){
       nxt = nxt.nextSibling;
     }
-    return nxt && nxt.nodeName === 'w';
+    return nxt ? nxt.nodeName : '';
   }
 
   function getLineText(el){
@@ -222,15 +210,18 @@
         if(endSpace)   out += ' ';
       }else{
         switch(ch.nodeName){
-          case "w":
+          case "w": {
             out += `<span class="lookup" data-word="${ch.textContent}" data-line-id="${currentLineId}">${ch.textContent}</span>`;
-            if(needsSpace(ch)) out += ' ';
-            if(!hasFollowingSpace(ch)) out += ' ';
+            const next = nextTagName(ch);
+            if(next && !['pc','c','lb','l'].includes(next)) out += ' ';
             break;
-          case "pc":
+          }
+          case "pc": {
             out += `<span data-line-id="${currentLineId}">${ch.textContent}</span>`;
-            if(!hasFollowingSpace(ch)) out += ' ';
+            const next = nextTagName(ch);
+            if(next && !['pc','c','lb','l'].includes(next)) out += ' ';
             break;
+          }
           case "c":    out += " ";                          break;
           case "lb": {
             const id = ch.getAttribute('xml:id') || '';
