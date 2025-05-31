@@ -18,6 +18,8 @@
     }
     select{font-size:1rem;margin:0 0 1rem 0}
     #viewer{white-space:pre-wrap}
+    .speech{position:relative;}
+    .copy-btn{margin-left:.5rem;font-size:.8rem;}
   </style>
 </head>
 <body>
@@ -35,7 +37,9 @@
     <select id="scenePicker"></select>
   </label>
 
+  <div id="cast"></div>
   <div id="viewer">Loading…</div>
+  <button id="nextBtn" style="display:none">Next Scene →</button>
 
   <script>
   /* ------------ available files ---------------- */
@@ -84,6 +88,17 @@
   const actPicker   = document.getElementById("actPicker");
   const scenePicker = document.getElementById("scenePicker");
   const viewer      = document.getElementById("viewer");
+  const castDiv     = document.getElementById("cast");
+  const nextBtn     = document.getElementById("nextBtn");
+  viewer.addEventListener('click',e=>{
+    if(e.target.classList.contains('copy-btn')){
+      const speech = e.target.closest('.speech').querySelector('.speech-text').innerText;
+      navigator.clipboard.writeText(speech).then(()=>{
+        e.target.textContent = 'Copied!';
+        setTimeout(()=>{e.target.textContent='Copy';},1000);
+      });
+    }
+  });
   const parser      = new DOMParser();
   let   currentDoc  = null;
   let   castHtml    = "";
@@ -144,7 +159,8 @@
             out += "<h3>"+teiToHtml(ch)+"</h3>";
             break;
           case "sp":
-            out += "<p>"+teiToHtml(ch)+"</p>";
+            out += '<p class="speech"><span class="speech-text">'+teiToHtml(ch)+'</span>'+
+                   ' <button class="copy-btn" aria-label="Copy speech">Copy</button></p>';
             break;
           default:
             out += teiToHtml(ch);
@@ -201,20 +217,60 @@
     if(!currentDoc) return;
     const acts = currentDoc.querySelectorAll('body div[type="act"]');
     let html = "";
+    let showCast = false;
     if(actPicker.value === "all"){
+      showCast = true;
       acts.forEach(a=>{html += teiToHtml(a);});
     }else{
       const act  = acts[actPicker.value];
       if(scenePicker.value === "all"){
+        showCast = actPicker.value === "0";
         html += teiToHtml(act);
       }else{
+        showCast = actPicker.value === "0";
         const scenes = act.querySelectorAll('div[type="scene"]');
         const scene  = scenes[scenePicker.value];
         html += teiToHtml(scene);
       }
     }
 
-    viewer.innerHTML = castHtml + html;
+    viewer.innerHTML = html;
+    castDiv.innerHTML = showCast ? castHtml : "";
+
+    if(actPicker.value !== "all" && scenePicker.value !== "all" && getNextSceneIndices()){
+      nextBtn.style.display = "";
+    }else{
+      nextBtn.style.display = "none";
+    }
+
+    window.scrollTo(0,0);
+  }
+
+  function getNextSceneIndices(){
+    if(!currentDoc) return null;
+    const acts = currentDoc.querySelectorAll('body div[type="act"]');
+    let a = Number(actPicker.value);
+    let s = Number(scenePicker.value);
+    if(isNaN(a) || isNaN(s)) return null;
+    let scenes = acts[a].querySelectorAll('div[type="scene"]');
+    if(s < scenes.length - 1){
+      return {actIndex:a, sceneIndex:s+1};
+    }
+    for(let nextA=a+1; nextA<acts.length; nextA++){
+      const nextScenes = acts[nextA].querySelectorAll('div[type="scene"]');
+      if(nextScenes.length){
+        return {actIndex:nextA, sceneIndex:0};
+      }
+    }
+    return null;
+  }
+
+  function gotoScene(indices){
+    const acts = currentDoc.querySelectorAll('body div[type="act"]');
+    actPicker.value = indices.actIndex;
+    populateScenes(acts[indices.actIndex]);
+    scenePicker.value = indices.sceneIndex;
+    displayScene();
   }
 
   /* --------------- main load ------------------ */
@@ -236,6 +292,11 @@
   /* -------------- wire-up --------------------- */
   document.getElementById("loadBtn")
           .addEventListener("click",()=>loadPlay(playPicker.value));
+
+  nextBtn.addEventListener('click',()=>{
+    const next = getNextSceneIndices();
+    if(next) gotoScene(next);
+  });
 
   loadPlay(plays[0]);                /* first view */
   </script>
