@@ -90,6 +90,8 @@
   const viewer      = document.getElementById("viewer");
   const castDiv     = document.getElementById("cast");
   const nextBtn     = document.getElementById("nextBtn");
+
+  /* copy-to-clipboard buttons */
   viewer.addEventListener('click',e=>{
     if(e.target.classList.contains('copy-btn')){
       const speech = e.target.closest('.speech').querySelector('.speech-text').innerText;
@@ -99,6 +101,7 @@
       });
     }
   });
+
   const parser      = new DOMParser();
   let   currentDoc  = null;
   let   castHtml    = "";
@@ -141,7 +144,7 @@
           case "speaker":
             out += "<strong>"+teiToHtml(ch)+"</strong> ";
             break;
-          case "stage":            /* italics + line break */
+          case "stage":
             out += "<em>"+teiToHtml(ch)+"</em><br>";
             break;
           case "castList":
