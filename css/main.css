@@ -1,80 +1,57 @@
-@font-face{
-  font-family:'Playfair Display';
-  src:url('../assets/fonts/PlayfairDisplay-Variable.woff2') format('woff2');
-  font-display:swap;
-}
-:root{
-  --bg:#0d0d0d;      --fg:#f7f7f7;
-  --accent:#e7b842;  --accent-2:#9d7c2c;
-  --radius:24px;
-  --space:1rem;
-  --fs-body:clamp(15px,0.9vw + 14px,18px);
-}
-@media(prefers-color-scheme:light){
-  :root{--bg:#fafafa;--fg:#111;}
-}
-body{
-  margin:0;
-  padding:0;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-  line-height:1.5;
-  font-size:var(--fs-body);
-  background:var(--bg);
-  color:var(--fg);
-}
-h1,h2,h3{
-  font-family:'Playfair Display',serif;
-  margin:0 0 var(--space);
-}
-h1{font-size:clamp(2.4rem,3vw + 1rem,4rem);font-weight:700;}
-h2{font-size:clamp(1.5rem,1vw + 1rem,2.25rem);font-weight:700;}
-.hero{
-  min-height:100vh;
+/* === quote stream & reveal === */
+.quote-stream{
+  position:absolute;
+  inset:0;
   display:flex;
   flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  text-align:center;
-  position:relative;
-  padding:var(--space);
+  gap:.25rem;
+  justify-content:center;     /* vertical centre */
+  align-items:center;          /* horizontal centre */
+  overflow:hidden;             /* clip long lines */
+  pointer-events:none;
 }
-.read-btn{
-  display:inline-block;
-  margin-top:1.5rem;
-  padding:0.5rem 2rem;
+
+.quote-line{
+  opacity:.08;
+  font-family:'Playfair Display',serif;
+  font-size:clamp(.8rem,.6rem + .6vw,1.1rem);
+  mix-blend-mode:luminosity;
+  animation:scrollFade 30s infinite;
+}
+
+/* optional “ghost” headline effect */
+.ghost{
+  opacity:0;
+  font-family:'Playfair Display',serif;
+  font-size:2rem;
+  color:var(--accent-2);
+  animation:fadeInOut 8s infinite;
+  mix-blend-mode:luminosity;
+}
+.ghost.revealed{opacity:.2;}
+
+/* keyframes */
+@keyframes scrollFade{
+  0%   {opacity:0;  transform:translateY(2rem);}
+  10%,90%{opacity:.12;}
+  100% {opacity:0;  transform:translateY(-2rem);}
+}
+@keyframes fadeInOut{
+  0%,80%  {opacity:0;}
+  15%,65% {opacity:.15;}
+}
+
+.home-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:44px;
+  height:44px;
+  border-radius:50%;
   background:var(--accent);
   color:var(--bg);
-  border-radius:var(--radius);
-  font-size:1.25rem;
   text-decoration:none;
-}
-.controls label{margin-right:0.5rem;display:inline-block;margin-bottom:1rem;}
-#viewer{white-space:pre-wrap;}
-.speech{position:relative;margin-bottom:var(--space);}
-.copy-btn{
-  margin-left:0.5rem;
-  position:relative;
-  width:2rem;height:2rem;
-  border:none;background:none;padding:0;
-  cursor:pointer;
-}
-.icon{width:1rem;height:1rem;transition:opacity .2s;vertical-align:middle;}
-.check{opacity:0;}
-.copied .copy{opacity:0;}
-.copied .check{opacity:1;}
-.fade-in{opacity:0;transform:translateY(1rem);transition:opacity .5s,transform .5s;}
-.fade-in.visible{opacity:1;transform:none;}
-.ghost-container{position:absolute;inset:0;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,1fr);pointer-events:none;}
-@keyframes fadeInOut{0%,80%{opacity:0}15%,65%{opacity:.15}}
-.ghost{opacity:0;font-family:'Playfair Display',serif;font-size:2rem;color:var(--accent-2);animation:fadeInOut 8s infinite;mix-blend-mode:luminosity;}
-.ghost.revealed{opacity:0.2;}
-.visually-hidden{position:absolute;left:-9999px}
-.word{cursor:help;}
-@media(min-width:48rem){
-  main{padding:2rem;}
-}
-@media(min-width:80rem){
-  main{padding:3rem;}
+  font-size:1.5rem;
 }
 
 /* bottom sheet play picker */

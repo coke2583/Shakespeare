@@ -1,5 +1,5 @@
   /* ------------ available files ---------------- */
-  const plays = [
+  export const plays = [
     "alls-well-that-ends-well_TEIsimple_FolgerShakespeare.xml",
     "a-midsummer-nights-dream_TEIsimple_FolgerShakespeare.xml",
     "antony-and-cleopatra_TEIsimple_FolgerShakespeare.xml",
