@@ -40,14 +40,19 @@
   ];
 
   /* ------------ element handles --------------- */
-  const playPicker  = document.getElementById("playPicker");
-  const actPicker   = document.getElementById("actPicker");
-  const scenePicker = document.getElementById("scenePicker");
+  const actPicker   = document.createElement('select');
+  const scenePicker = document.createElement('select');
   const viewer      = document.getElementById("viewer");
   const castDiv     = document.getElementById("cast");
   const nextBtn     = document.getElementById("nextBtn");
   const playSheet   = document.getElementById('playSheet');
+  const playSearch  = playSheet.querySelector('input[type=search]');
   const sheetList   = playSheet.querySelector('ul');
+  const contentsSheet = document.getElementById('contentsSheet');
+  const actCtrl     = document.getElementById('actCtrl');
+  const sceneCtrl   = document.getElementById('sceneCtrl');
+  const contentsBtn = document.querySelector('.contents-btn');
+  const header      = document.querySelector('header');
 
   /* copy-to-clipboard buttons */
   const announce = document.getElementById('announce');
@@ -84,23 +89,25 @@
     const title = f.replace(/_TEIsimple_FolgerShakespeare\.xml$/,"")
                     .replace(/-/g," ")
                     .replace(/\b\w/g,c=>c.toUpperCase());
-    const o = document.createElement("option");
-    o.value = f;
-    o.textContent = title;
-    playPicker.appendChild(o);
-
     const li = document.createElement('li');
     li.dataset.file = f;
     li.textContent = title;
     sheetList.appendChild(li);
   });
 
-  playSheet.classList.add('open');
+  openSheet(playSheet);
+
+  playSearch.addEventListener('input',()=>{
+    const term = playSearch.value.toLowerCase();
+    sheetList.querySelectorAll('li').forEach(li=>{
+      li.style.display = li.textContent.toLowerCase().includes(term) ? '' : 'none';
+    });
+  });
 
   sheetList.addEventListener('click',e=>{
     const li = e.target.closest('li');
     if(!li) return;
-    playSheet.classList.remove('open');
+    closeSheet(playSheet);
     loadPlay(li.dataset.file);
   });
 
@@ -197,6 +204,7 @@
     };
     actPicker.value = "all";
     populateScenes(null);
+    renderActSegments();
   }
 
   function populateScenes(act){
@@ -212,6 +220,7 @@
     });
     scenePicker.onchange = displayScene;
     scenePicker.value = "all";
+    renderSceneSegments();
   }
 
   /* --------------- render view ---------------- */
@@ -274,6 +283,35 @@
     displayScene();
   }
 
+  function renderActSegments(){
+    actCtrl.innerHTML = '';
+    const btnAll = document.createElement('button');
+    btnAll.textContent = 'All Acts';
+    btnAll.dataset.value = 'all';
+    if(actPicker.value === 'all') btnAll.classList.add('active');
+    actCtrl.appendChild(btnAll);
+    const acts = currentDoc.querySelectorAll('body div[type="act"]');
+    acts.forEach((act,i)=>{
+      const head = act.querySelector('head');
+      const btn = document.createElement('button');
+      btn.dataset.value = i;
+      btn.textContent = head?head.textContent.trim():`Act ${i+1}`;
+      if(actPicker.value == i) btn.classList.add('active');
+      actCtrl.appendChild(btn);
+    });
+  }
+
+  function renderSceneSegments(){
+    sceneCtrl.innerHTML = '';
+    Array.from(scenePicker.options).forEach(opt=>{
+      const btn = document.createElement('button');
+      btn.dataset.value = opt.value;
+      btn.textContent = opt.textContent;
+      if(scenePicker.value === opt.value) btn.classList.add('active');
+      sceneCtrl.appendChild(btn);
+    });
+  }
+
   function getDefinitionText(data){
     if(!Array.isArray(data) || !data.length) return 'No definition found.';
     const entry = data[0];
@@ -332,13 +370,52 @@
   }
 
   /* -------------- wire-up --------------------- */
-  document.getElementById("loadBtn")
-          .addEventListener("click",()=>loadPlay(playPicker.value));
-
   nextBtn.addEventListener('click',()=>{
     const next = getNextSceneIndices();
     if(next) gotoScene(next);
   });
+
+  contentsBtn.addEventListener('click',()=>openSheet(contentsSheet));
+
+  actCtrl.addEventListener('click',e=>{
+    const b = e.target.closest('button');
+    if(!b) return;
+    actPicker.value = b.dataset.value;
+    const acts = currentDoc.querySelectorAll('body div[type="act"]');
+    const val = actPicker.value === 'all' ? null : acts[actPicker.value];
+    populateScenes(val);
+    renderActSegments();
+  });
+
+  sceneCtrl.addEventListener('click',e=>{
+    const b = e.target.closest('button');
+    if(!b) return;
+    scenePicker.value = b.dataset.value;
+    renderSceneSegments();
+  });
+
+  contentsSheet.addEventListener('click',e=>{
+    if(e.target===contentsSheet) closeSheet(contentsSheet);
+  });
+
+  window.addEventListener('scroll',()=>{
+    if(scrollY>80 && !header.classList.contains('compact')){
+      header.classList.add('compact');
+    }else if(scrollY<=80 && header.classList.contains('compact')){
+      header.classList.remove('compact');
+    }
+  });
+
+  function openSheet(sheet){
+    sheet.classList.add('open');
+    const focusable = sheet.querySelector('input,button,li');
+    if(focusable) focusable.focus();
+  }
+
+  function closeSheet(sheet){
+    sheet.classList.remove('open');
+    if(sheet===contentsSheet) displayScene();
+  }
 
 
 

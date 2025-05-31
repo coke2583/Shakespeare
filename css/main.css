@@ -71,7 +71,6 @@ h2{font-size:clamp(1.5rem,1vw + 1rem,2.25rem);font-weight:700;}
   font-size:0.85em;
   margin-top:0.25em;
 }
-.controls label{margin-right:0.5rem;display:inline-block;margin-bottom:1rem;}
 #viewer{white-space:pre-wrap;}
 .speech{position:relative;margin-bottom:var(--space);}
 .copy-btn{
@@ -148,8 +147,8 @@ main{padding:var(--space);}
   main{padding:3rem;}
 }
 
-/* bottom sheet play picker */
-#playSheet{
+/* bottom sheets */
+.sheet{
   position:fixed;
   left:0;right:0;bottom:0;
   background:var(--bg);
@@ -163,9 +162,32 @@ main{padding:var(--space);}
   max-height:60vh;
   overflow-y:auto;
 }
-#playSheet.open{transform:none;}
 #playSheet ul{list-style:none;margin:0;padding:0;}
-#playSheet li{padding:0.5rem 0;border-bottom:1px solid var(--accent-2);cursor:pointer;}
+.sheet.open{transform:none;}
+#playSheet input[type=search]{
+  width:100%;margin-bottom:.5rem;padding:.5rem;border-radius:var(--radius);
+  border:1px solid var(--accent-2);background:var(--bg);color:var(--fg);
+}
+#playSheet li{padding:0.75rem 0;border-bottom:1px solid var(--accent-2);cursor:pointer;font-family:'Playfair Display',serif;min-height:48px;display:flex;align-items:center;}
+
+#contentsSheet .segmented{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.5rem;}
+#contentsSheet .segmented button{
+  flex:1;padding:.5rem 1rem;border:1px solid var(--accent-2);
+  background:transparent;color:var(--fg);border-radius:var(--radius);
+}
+#contentsSheet .segmented button.active{background:var(--accent);color:var(--bg);}
+
+.contents-btn{
+  position:fixed;right:1rem;bottom:1rem;padding:.5rem 1rem;border-radius:24px;
+  background:var(--accent);color:var(--bg);font-family:'Playfair Display',serif;
+  font-weight:600;box-shadow:0 4px 12px #0004;border:none;cursor:pointer;
+}
+
+header{position:sticky;top:0;z-index:2;background:var(--bg);display:flex;align-items:center;padding:var(--space);}
+header.large h1{font-size:clamp(2.4rem,3vw+1rem,4rem);}
+header.compact h1{font-size:1.25rem;transition:.3s;}
+.home-btn{margin-left:8px;}
+@media(min-width:48rem){.home-btn{margin-left:16px;}}
 
 /* tooltip for dictionary definitions */
 .tooltip{

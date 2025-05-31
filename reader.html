@@ -9,26 +9,28 @@
   <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-<header>
+<header class="large">
   <a href="index.html" class="home-btn" aria-label="Back">&#x2190;</a>
+  <h1 class="brand-text">Shakespeare Reader</h1>
 </header>
 <main>
-  <h1 class="brand-text">Shakespeare Reader</h1>
-  <div class="controls">
-    <label>Play: <select id="playPicker"></select></label>
-    <button id="loadBtn">Load</button>
-    <label>Act: <select id="actPicker"></select></label>
-    <label>Scene: <select id="scenePicker"></select></label>
-  </div>
   <div id="cast"></div>
   <div id="viewer" aria-live="polite"></div>
   <button id="nextBtn" style="display:none">Next Scene →</button>
   <div id="announce" class="visually-hidden" aria-live="polite"></div>
 
   <!-- merged bottom-sheet play menu -->
-  <div id="playSheet" class="sheet" role="dialog" aria-label="Choose a play">
+  <div id="playSheet" class="sheet" role="dialog" aria-modal="true" aria-label="Choose a play">
+    <input type="search" placeholder="Search plays…">
     <ul></ul>
   </div>
+
+  <div id="contentsSheet" class="sheet" role="dialog" aria-modal="true" aria-label="Choose Act and Scene">
+    <div id="actCtrl" class="segmented"></div>
+    <div id="sceneCtrl" class="segmented"></div>
+  </div>
+
+  <button class="contents-btn" aria-label="Contents">Contents</button>
 </main>
 
 <!-- copy / check icons -->
