@@ -26,6 +26,7 @@ h1,h2,h3{
   font-family:'Playfair Display',serif;
   margin:0 0 var(--space);
 }
+.brand-text{font-family:'Playfair Display',serif;font-weight:600;}
 h1{font-size:clamp(2.4rem,3vw + 1rem,4rem);font-weight:700;}
 h2{font-size:clamp(1.5rem,1vw + 1rem,2.25rem);font-weight:700;}
 .hero{
@@ -64,12 +65,14 @@ h2{font-size:clamp(1.5rem,1vw + 1rem,2.25rem);font-weight:700;}
 .copied .check{opacity:1;}
 .fade-in{opacity:0;transform:translateY(1rem);transition:opacity .5s,transform .5s;}
 .fade-in.visible{opacity:1;transform:none;}
-.ghost-container{position:absolute;inset:0;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,1fr);pointer-events:none;}
-@keyframes fadeInOut{0%,80%{opacity:0}15%,65%{opacity:.15}}
-.ghost{opacity:0;font-family:'Playfair Display',serif;font-size:2rem;color:var(--accent-2);animation:fadeInOut 8s infinite;mix-blend-mode:luminosity;}
-.ghost.revealed{opacity:0.2;}
+.quote-stream{position:absolute;inset:0;display:flex;flex-direction:column;gap:.25rem;pointer-events:none;}
+.quote-line{opacity:.08;font-family:'Playfair Display',serif;font-size:clamp(.8rem,.6rem + .6vw,1.1rem);mix-blend-mode:luminosity;animation:scrollFade 30s infinite;}
+@keyframes scrollFade{0%{opacity:0;transform:translateY(2rem)}10%,90%{opacity:.12}100%{opacity:0;transform:translateY(-2rem)}}
 .visually-hidden{position:absolute;left:-9999px}
 .word{cursor:help;}
+.sheet{position:fixed;left:0;right:0;bottom:-100%;background:var(--bg);border-radius:24px 24px 0 0;padding:1rem;max-height:70vh;transition:bottom .3s ease;}
+.sheet.open{bottom:0;}
+.tooltip{position:fixed;max-width:260px;font-size:.9rem;background:var(--fg);color:var(--bg);padding:.5rem .75rem;border-radius:8px;box-shadow:0 6px 12px #0003;z-index:10;}
 @media(min-width:48rem){
   main{padding:2rem;}
 }

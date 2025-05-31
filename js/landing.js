@@ -11,28 +11,14 @@ const quotes=[
   'Cry havoc and let slip the dogs of war'
 ];
 
-const container=document.querySelector('.ghost-container');
-const cells=Array.from({length:16},(_,i)=>i);
-quotes.slice(0,10).forEach(q=>{
+const container=document.querySelector('.quote-stream');
+quotes.forEach((q,i)=>{
   const span=document.createElement('span');
-  span.className='ghost';
+  span.className='quote-line';
   span.textContent=q;
-  const i=cells.splice(Math.floor(Math.random()*cells.length),1)[0];
-  span.style.gridColumn=(i%4)+1;
-  span.style.gridRow=Math.floor(i/4)+1;
+  span.style.animationDelay=`${i*3}s`;
   container.appendChild(span);
 });
-
-function cycleQuotes(box){
-  let active=0;
-  box.children[active].classList.add('revealed');
-  setInterval(()=>{
-    box.children[active].classList.remove('revealed');
-    active=(active+1)%box.children.length;
-    box.children[active].classList.add('revealed');
-  },4000);
-}
-cycleQuotes(container);
 
 const io=new IntersectionObserver((entries,ob)=>{
   entries.forEach(e=>{
