@@ -1,0 +1,31 @@
+/* Landing page styles */
+
+.home-btn{
+  display:inline-block;
+  padding:0.5rem 1.5rem;
+  background:var(--accent);
+  color:var(--bg);
+  border-radius:var(--radius);
+  text-decoration:none;
+  font-size:1rem;
+}
+
+.progress.indeterminate{
+  position:relative;
+  overflow:hidden;
+}
+.progress.indeterminate::before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:-50%;
+  height:100%;
+  width:50%;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);
+  animation:slide 3s linear infinite;
+}
+
+@keyframes slide{
+  from{left:-50%;}
+  to{left:100%;}
+}
