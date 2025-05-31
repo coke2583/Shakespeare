@@ -37,7 +37,9 @@
     <select id="scenePicker"></select>
   </label>
 
+  <div id="cast"></div>
   <div id="viewer">Loading…</div>
+  <button id="nextBtn" style="display:none">Next Scene →</button>
 
   <script>
   /* ------------ available files ---------------- */
@@ -86,6 +88,10 @@
   const actPicker   = document.getElementById("actPicker");
   const scenePicker = document.getElementById("scenePicker");
   const viewer      = document.getElementById("viewer");
+  const castDiv     = document.getElementById("cast");
+  const nextBtn     = document.getElementById("nextBtn");
+
+  /* copy-to-clipboard buttons */
   viewer.addEventListener('click',e=>{
     if(e.target.classList.contains('copy-btn')){
       const speech = e.target.closest('.speech').querySelector('.speech-text').innerText;
@@ -95,6 +101,7 @@
       });
     }
   });
+
   const parser      = new DOMParser();
   let   currentDoc  = null;
   let   castHtml    = "";
@@ -137,7 +144,7 @@
           case "speaker":
             out += "<strong>"+teiToHtml(ch)+"</strong> ";
             break;
-          case "stage":            /* italics + line break */
+          case "stage":
             out += "<em>"+teiToHtml(ch)+"</em><br>";
             break;
           case "castList":
@@ -213,20 +220,60 @@
     if(!currentDoc) return;
     const acts = currentDoc.querySelectorAll('body div[type="act"]');
     let html = "";
+    let showCast = false;
     if(actPicker.value === "all"){
+      showCast = true;
       acts.forEach(a=>{html += teiToHtml(a);});
     }else{
       const act  = acts[actPicker.value];
       if(scenePicker.value === "all"){
+        showCast = actPicker.value === "0";
         html += teiToHtml(act);
       }else{
+        showCast = actPicker.value === "0";
         const scenes = act.querySelectorAll('div[type="scene"]');
         const scene  = scenes[scenePicker.value];
         html += teiToHtml(scene);
       }
     }
 
-    viewer.innerHTML = castHtml + html;
+    viewer.innerHTML = html;
+    castDiv.innerHTML = showCast ? castHtml : "";
+
+    if(actPicker.value !== "all" && scenePicker.value !== "all" && getNextSceneIndices()){
+      nextBtn.style.display = "";
+    }else{
+      nextBtn.style.display = "none";
+    }
+
+    window.scrollTo(0,0);
+  }
+
+  function getNextSceneIndices(){
+    if(!currentDoc) return null;
+    const acts = currentDoc.querySelectorAll('body div[type="act"]');
+    let a = Number(actPicker.value);
+    let s = Number(scenePicker.value);
+    if(isNaN(a) || isNaN(s)) return null;
+    let scenes = acts[a].querySelectorAll('div[type="scene"]');
+    if(s < scenes.length - 1){
+      return {actIndex:a, sceneIndex:s+1};
+    }
+    for(let nextA=a+1; nextA<acts.length; nextA++){
+      const nextScenes = acts[nextA].querySelectorAll('div[type="scene"]');
+      if(nextScenes.length){
+        return {actIndex:nextA, sceneIndex:0};
+      }
+    }
+    return null;
+  }
+
+  function gotoScene(indices){
+    const acts = currentDoc.querySelectorAll('body div[type="act"]');
+    actPicker.value = indices.actIndex;
+    populateScenes(acts[indices.actIndex]);
+    scenePicker.value = indices.sceneIndex;
+    displayScene();
   }
 
   /* --------------- main load ------------------ */
@@ -248,6 +295,11 @@
   /* -------------- wire-up --------------------- */
   document.getElementById("loadBtn")
           .addEventListener("click",()=>loadPlay(playPicker.value));
+
+  nextBtn.addEventListener('click',()=>{
+    const next = getNextSceneIndices();
+    if(next) gotoScene(next);
+  });
 
   loadPlay(plays[0]);                /* first view */
   </script>
