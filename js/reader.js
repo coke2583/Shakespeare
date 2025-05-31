@@ -46,10 +46,13 @@
   const viewer      = document.getElementById("viewer");
   const castDiv     = document.getElementById("cast");
   const nextBtn     = document.getElementById("nextBtn");
+  const playSheet   = document.getElementById('playSheet');
+  const sheetList   = playSheet.querySelector('ul');
 
   /* copy-to-clipboard buttons */
   const announce = document.getElementById('announce');
-  viewer.addEventListener('click',e=>{
+  const defs = new Map();
+  viewer.addEventListener('click',async e=>{
     const btn = e.target.closest('.copy-btn');
     if(btn){
       const speech = btn.closest('.speech').querySelector('.speech-text').innerText;
@@ -59,6 +62,16 @@
           announce.textContent = 'Copied!';
           setTimeout(()=>btn.classList.remove('copied'),1000);
         });
+      return;
+    }
+
+    const w = e.target.closest('.lookup');
+    if(w){
+      const word = w.dataset.word.toLowerCase();
+      const cached = defs.get(word) || await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`)
+                            .then(r=>r.json()).catch(()=>null);
+      if(!defs.has(word) && cached) defs.set(word,cached);
+      showTooltip(e.clientX,e.clientY,getDefinitionText(cached));
     }
   });
 
@@ -68,12 +81,27 @@
 
   /* ----------- populate play list ------------- */
   plays.forEach(f=>{
+    const title = f.replace(/_TEIsimple_FolgerShakespeare\.xml$/,"")
+                    .replace(/-/g," ")
+                    .replace(/\b\w/g,c=>c.toUpperCase());
     const o = document.createElement("option");
     o.value = f;
-    o.textContent = f.replace(/_TEIsimple_FolgerShakespeare\.xml$/,"")
-                     .replace(/-/g," ")
-                     .replace(/\b\w/g,c=>c.toUpperCase());
+    o.textContent = title;
     playPicker.appendChild(o);
+
+    const li = document.createElement('li');
+    li.dataset.file = f;
+    li.textContent = title;
+    sheetList.appendChild(li);
+  });
+
+  playSheet.classList.add('open');
+
+  sheetList.addEventListener('click',e=>{
+    const li = e.target.closest('li');
+    if(!li) return;
+    playSheet.classList.remove('open');
+    loadPlay(li.dataset.file);
   });
 
   /* ------------- TEI → HTML ------------------- */
@@ -94,6 +122,8 @@
       }else{
         switch(ch.nodeName){
           case "w":
+            out += `<span class="lookup" data-word="${ch.textContent}">${ch.textContent}</span>`;
+            break;
           case "pc":   out += ch.textContent;               break;
           case "c":    out += " ";                          break;
           case "lb":   out += "<br>";                       break;
@@ -114,7 +144,7 @@
           case "stage":   out += "<em>"+teiToHtml(ch)+"</em><br>";  break;
 
           case "castList":
-            out += "<h2>Dramatis Personae</h2><ul>"+teiToHtml(ch)+"</ul><br>";
+            out += '<h2 class="act-title">Dramatis Personae</h2><ul>'+teiToHtml(ch)+"</ul><br>";
             break;
           case "castItem": {                                   // format character list
             const name = ch.getElementsByTagName("role")[0];
@@ -128,13 +158,16 @@
             if(ch.parentNode && ch.parentNode.nodeName==="castGroup"){
               out += "<li><strong>"+teiToHtml(ch)+"</strong></li>";
             }else{
-              out += "<h3>"+teiToHtml(ch)+"</h3>";
+              out += '<h3 class="scene-title">'+teiToHtml(ch)+"</h3>";
             }
             break;
 
           case "sp":  // speech block with copy button
             out += '<p class="speech"><span class="speech-text">'+teiToHtml(ch)+'</span>'+
-                   '<button class="copy-btn" aria-label="Copy"><svg class="icon copy"><use href="assets/icons.svg#copy"/></svg><svg class="icon check"><use href="assets/icons.svg#check"/></svg></button></p>';
+                   '<button class="copy-btn" aria-label="Copy">'+
+                     '<img class="icon copy" src="assets/copyIcon.png" alt="">'+
+                     '<img class="icon check" src="assets/tick.png" alt="">'+
+                   '</button></p>';
             break;
 
           default:    out += teiToHtml(ch);
@@ -255,6 +288,31 @@
     displayScene();
   }
 
+  function getDefinitionText(data){
+    if(!Array.isArray(data) || !data.length) return 'No definition found.';
+    const entry = data[0];
+    const defs = (entry.meanings||[])
+      .map(m=>`<strong>${m.partOfSpeech}</strong> ${m.definitions[0].definition}`)
+      .join('<br>');
+    return `<strong>${entry.word}</strong><br>${defs}`;
+  }
+
+  function showTooltip(x,y,html){
+    document.querySelectorAll('.tooltip').forEach(t=>t.remove());
+    if(!html) return;
+    const div = document.createElement('div');
+    div.className = 'tooltip';
+    div.innerHTML = html;
+    document.body.appendChild(div);
+    const rect = div.getBoundingClientRect();
+    const left = Math.min(x, window.innerWidth - rect.width - 10);
+    div.style.left = left + 'px';
+    div.style.top  = (y - rect.height - 10) + 'px';
+    setTimeout(()=>{
+      document.addEventListener('click',()=>div.remove(),{once:true});
+    },0);
+  }
+
   /* --------------- main load ------------------ */
   async function loadPlay(file){
     viewer.textContent = 'Loading… 0 %';
@@ -269,7 +327,11 @@
         if(done) break;
         chunks.push(value);
         loaded += value.length;
-        if(total) viewer.textContent = `Loading… ${(loaded/total*100).toFixed(0)} %`;
+        if(total>0){
+          viewer.textContent = `Loading… ${(Math.min(loaded/total,1)*100).toFixed(0)} %`;
+        }else{
+          viewer.innerHTML = '<progress class="indeterminate"></progress>';
+        }
       }
       const xml = await new Blob(chunks).text();
       currentDoc = parser.parseFromString(xml, 'application/xml');
