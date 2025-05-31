@@ -1,38 +1,36 @@
-const quotes=[
-  'To be, or not to be',
-  'All the world\'s a stage',
-  'The play\'s the thing',
-  'If music be the food of love, play on',
-  'The lady doth protest too much, methinks',
-  'Some are born great, some achieve greatness',
-  'Brevity is the soul of wit',
-  'We are such stuff as dreams are made on',
-  'Now is the winter of our discontent',
-  'Cry havoc and let slip the dogs of war'
-];
+import {plays} from './reader.js';
 
-const container=document.querySelector('.ghost-container');
-const cells=Array.from({length:16},(_,i)=>i);
-quotes.slice(0,10).forEach(q=>{
-  const span=document.createElement('span');
-  span.className='ghost';
-  span.textContent=q;
-  const i=cells.splice(Math.floor(Math.random()*cells.length),1)[0];
-  span.style.gridColumn=(i%4)+1;
-  span.style.gridRow=Math.floor(i/4)+1;
-  container.appendChild(span);
-});
+const parser = new DOMParser();
 
-function cycleQuotes(box){
-  let active=0;
-  box.children[active].classList.add('revealed');
-  setInterval(()=>{
-    box.children[active].classList.remove('revealed');
-    active=(active+1)%box.children.length;
-    box.children[active].classList.add('revealed');
-  },4000);
+async function buildLinePool(){
+  const file = plays[Math.floor(Math.random()*plays.length)];
+  const res = await fetch(`XML/${file}`);
+  const xml = await res.text();
+  const doc = parser.parseFromString(xml,'application/xml');
+  const lines=[];
+  doc.querySelectorAll('l,p').forEach(el=>{
+    const text = el.textContent.trim().replace(/\s+/g,' ');
+    if(text.length>40) lines.push(text);
+  });
+  for(let i=lines.length-1; i>0; i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [lines[i],lines[j]]=[lines[j],lines[i]];
+  }
+  return lines.slice(0,20);
 }
-cycleQuotes(container);
+
+const cached = JSON.parse(sessionStorage.getItem('quotes')||'null');
+const linePool = cached || await buildLinePool();
+if(!cached) sessionStorage.setItem('quotes',JSON.stringify(linePool));
+
+const stream = document.querySelector('.quote-stream');
+linePool.forEach(text=>{
+  const span=document.createElement('span');
+  span.className='quote-line';
+  span.style.animationDelay=`${Math.random()*30}s`;
+  span.textContent=text;
+  stream.append(span);
+});
 
 const io=new IntersectionObserver((entries,ob)=>{
   entries.forEach(e=>{
