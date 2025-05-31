@@ -1,19 +1,19 @@
-/* ---------- quote-stream.js (merged) ---------- */
+/* ---------- quote-stream.js ---------- */
 import { FAMOUS_QUOTES } from './quotes.js';
 
+/* Use the curated list as our quote pool */
 const pool = FAMOUS_QUOTES;
 
 /* ---------- background “book page” wall ---------- */
-const box=document.querySelector('.quote-stream');
-pool.forEach(text=>{
-  const span=document.createElement('span');
-  span.className='quote-line';
-  span.textContent=text;
+const box = document.querySelector('.quote-stream');
+pool.forEach(text => {
+  const span = document.createElement('span');
+  span.className = 'quote-line';
+  span.textContent = text;
   box.append(span);
 });
 
-
-/* fade-in helper for hero elements */
+/* ---------- fade-in helper for hero elements ---------- */
 const io = new IntersectionObserver((entries, ob) => {
   entries.forEach(e => {
     if (e.isIntersecting) {
@@ -25,8 +25,8 @@ const io = new IntersectionObserver((entries, ob) => {
 document.querySelectorAll('.fade-in').forEach(el => io.observe(el));
 
 /* ---------- rotating centre quote ---------- */
-const quoteEl   = document.getElementById('rotating-quote');
-let quoteIndex  = 0;
+const quoteEl  = document.getElementById('rotating-quote');
+let quoteIndex = 0;
 
 function showNextQuote() {
   if (!pool.length) return;

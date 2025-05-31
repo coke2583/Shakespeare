@@ -101,6 +101,14 @@ h2{font-size:clamp(1.5rem,1vw + 1rem,2.25rem);font-weight:700;}
   pointer-events:none;
 }
 
+/* Quote-stream styling — final merge */
+.quote-stream{
+  position:absolute; inset:0;
+  display:flex; flex-direction:column; gap:0.25rem;
+  padding:0.5rem 1rem;
+  pointer-events:none;
+}
+
 .quote-line{
   font-family:'Playfair Display',serif;
   font-size:clamp(.8rem,.6rem + .6vw,1.1rem);
@@ -109,13 +117,16 @@ h2{font-size:clamp(1.5rem,1vw + 1rem,2.25rem);font-weight:700;}
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
-  color:var(--quote-colors);
-  animation:none;
+  color:var(--quote-colors);   /* default tint (over-ridden below) */
+  animation:none;              /* static, no scrollFade on lines */
 }
-.quote-line:nth-child(4n+1){color:#ffffff14}
-.quote-line:nth-child(4n+2){color:#ffd28014}
-.quote-line:nth-child(4n+3){color:#ff9ed814}
-.quote-line:nth-child(4n+4){color:#9ad8ff14}
+
+/* four soft translucent tints, cycled through the list */
+.quote-line:nth-child(4n+1){color:#ffffff14;}
+.quote-line:nth-child(4n+2){color:#ffd28014;}
+.quote-line:nth-child(4n+3){color:#ff9ed814;}
+.quote-line:nth-child(4n+4){color:#9ad8ff14;}
+
 @keyframes scrollFade{
   0%   {opacity:0; transform:translateY(1rem);}
   10%  {opacity:.12;}
@@ -163,6 +174,6 @@ main{padding:var(--space);}
   z-index:1000;
 }
 
-.lookup{cursor:help;border-bottom:1px dotted var(--accent-2);}
+.lookup{cursor:help;}
 
 .act-title,.scene-title{font-family:'Playfair Display',serif;}
