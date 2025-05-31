@@ -189,6 +189,13 @@
     });
   }
 
+  function nextTokenIsWord(node){
+    let nxt = node.nextSibling;
+    while(nxt && nxt.nodeType===Node.TEXT_NODE && nxt.nodeValue.trim()===''){
+      nxt = nxt.nextSibling;
+    }
+    return nxt && nxt.nodeName === 'w';
+  }
 
   /* ------------- TEI → HTML ------------------- */
   function teiToHtml(node){
@@ -209,11 +216,19 @@
         switch(ch.nodeName){
           case "w":
             out += `<span class="lookup" data-word="${ch.textContent}" data-line-id="${currentLineId}">${ch.textContent}</span>`;
+
+            if(!hasFollowingSpace(ch) && nextTokenIsWord(ch)) out += ' ';
+            break;
+          case "pc":
+            out += `<span data-line-id="${currentLineId}">${ch.textContent}</span>`;
+            /* never append implicit space after punctuation */
+
             if(!hasFollowingSpace(ch)) out += ' ';
             break;
           case "pc":
             out += `<span data-line-id="${currentLineId}">${ch.textContent}</span>`;
             if(!hasFollowingSpace(ch)) out += ' ';
+
             break;
           case "c":    out += " ";                          break;
           case "lb": {
