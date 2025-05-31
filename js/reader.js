@@ -108,6 +108,18 @@
     }
   }
 
+  function hasFollowingSpace(node){
+    let next = node.nextSibling;
+    while(next){
+      if(next.nodeType===Node.TEXT_NODE && next.nodeValue.trim()===''){
+        next = next.nextSibling;
+        continue;
+      }
+      return next && (next.nodeName==='c' || next.nodeName==='lb' || next.nodeName==='l');
+    }
+    return false;
+  }
+
   function getLineText(el){
     return Array.from(el.childNodes).map(nodeText).join('').trim();
   }
@@ -177,6 +189,13 @@
     });
   }
 
+  function nextTokenIsWord(node){
+    let nxt = node.nextSibling;
+    while(nxt && nxt.nodeType===Node.TEXT_NODE && nxt.nodeValue.trim()===''){
+      nxt = nxt.nextSibling;
+    }
+    return nxt && nxt.nodeName === 'w';
+  }
 
   /* ------------- TEI → HTML ------------------- */
   function teiToHtml(node){
@@ -197,9 +216,11 @@
         switch(ch.nodeName){
           case "w":
             out += `<span class="lookup" data-word="${ch.textContent}" data-line-id="${currentLineId}">${ch.textContent}</span>`;
+            if(!hasFollowingSpace(ch) && nextTokenIsWord(ch)) out += ' ';
             break;
           case "pc":
             out += `<span data-line-id="${currentLineId}">${ch.textContent}</span>`;
+            /* never append implicit space after punctuation */
             break;
           case "c":    out += " ";                          break;
           case "lb": {
@@ -219,10 +240,6 @@
             currentLineId = prev;
             break;
           }
-
-            break;
-          }
-          case "l":    out += teiToHtml(ch)+"<br>";         break;
 
           case "p":    out += teiToHtml(ch)+"<br><br>";     break;
 
@@ -317,15 +334,9 @@
     linePicker.innerHTML = '';
     linePicker.appendChild(new Option('Top',''));
     if(scene){
-
       scene.querySelectorAll('lb[n], l[n]').forEach(el=>{
         const n = el.getAttribute('n');
         const id = el.getAttribute('xml:id');
-
-      scene.querySelectorAll('lb[n]').forEach(lb=>{
-        const n = lb.getAttribute('n');
-        const id = lb.getAttribute('xml:id');
-
         if(n && id) linePicker.appendChild(new Option(n,id));
       });
     }
