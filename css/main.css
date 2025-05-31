@@ -40,3 +40,16 @@
   0%,80%  {opacity:0;}
   15%,65% {opacity:.15;}
 }
+
+.home-btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  background:var(--accent);
+  color:var(--bg);
+  text-decoration:none;
+  font-size:1.5rem;
+}
