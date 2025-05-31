@@ -79,8 +79,9 @@
     let out = "";
     node.childNodes.forEach(ch=>{
       if(ch.nodeType === Node.TEXT_NODE){
-        /* preserve leading/trailing spaces once, collapse internals */      // TEI whitespace rules :contentReference[oaicite:2]{index=2}
+        /* preserve significant spaces, ignore purely formatting whitespace */
         let text = ch.nodeValue;
+        if(text.trim() === '') return;
         const startSpace = /^\s/.test(text);
         const endSpace   = /\s$/.test(text);
         text = text.trim().replace(/\s+/g,' ');
