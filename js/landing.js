@@ -28,11 +28,21 @@ document.querySelectorAll('.fade-in').forEach(el => io.observe(el));
 const quoteEl  = document.getElementById('rotating-quote');
 let quoteIndex = 0;
 
+function parseQuote(q) {
+  const match = q.match(/^(.*?)(?: \(([^)]+)\))?$/);
+  return {
+    text: match ? match[1] : q,
+    attr: match && match[2] ? match[2] : ''
+  };
+}
+
 function showNextQuote() {
   if (!pool.length) return;
   quoteEl.classList.remove('visible');
   setTimeout(() => {
-    quoteEl.textContent = pool[quoteIndex];
+    const { text, attr } = parseQuote(pool[quoteIndex]);
+    quoteEl.innerHTML = `<span class="quote-text">${text}</span>` +
+      (attr ? `<br><span class="quote-attr">${attr}</span>` : '');
     quoteEl.classList.add('visible');
     quoteIndex = (quoteIndex + 1) % pool.length;
   }, 500);
