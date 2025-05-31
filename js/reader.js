@@ -45,8 +45,8 @@
   const scenePicker = d? d.createElement('select') : {value:'all'};
   const linePicker  = d? d.getElementById('linePicker') : {value:''};
   const searchSheet = d? d.getElementById('searchSheet') : null;
-  const searchInput = searchSheet? searchSheet.querySelector('input[type=search]') : null;
-  const searchList  = searchSheet? searchSheet.querySelector('ul') : null;
+  const searchInput = searchSheet ? searchSheet.querySelector('input[type=search]') : null;
+  const searchList  = searchSheet ? searchSheet.querySelector('ul') : null;
   const searchBtn   = d? d.querySelector('.search-btn') : {style:{display:'none'}};
   const viewer      = d? d.getElementById("viewer")  : {innerHTML:'',textContent:''};
   const castDiv     = d? d.getElementById("cast")    : {innerHTML:''};
@@ -108,12 +108,24 @@
     }
   }
 
-  function nextTagName(node){
+  function hasFollowingSpace(node){
+    let next = node.nextSibling;
+    while(next){
+      if(next.nodeType===Node.TEXT_NODE && next.nodeValue.trim()===''){
+        next = next.nextSibling;
+        continue;
+      }
+      return next && (next.nodeName==='c' || next.nodeName==='lb' || next.nodeName==='l');
+    }
+    return false;
+  }
+
+  function needsSpace(node){
     let nxt = node.nextSibling;
     while(nxt && nxt.nodeType === Node.TEXT_NODE && !/\S/.test(nxt.nodeValue)){
       nxt = nxt.nextSibling;
     }
-    return nxt ? nxt.nodeName : '';
+    return nxt && nxt.nodeName === 'w';
   }
 
   function getLineText(el){
@@ -210,18 +222,15 @@
         if(endSpace)   out += ' ';
       }else{
         switch(ch.nodeName){
-          case "w": {
+          case "w":
             out += `<span class="lookup" data-word="${ch.textContent}" data-line-id="${currentLineId}">${ch.textContent}</span>`;
-            const next = nextTagName(ch);
-            if(next && !['pc','c','lb','l'].includes(next)) out += ' ';
+            if(needsSpace(ch)) out += ' ';
+            if(!hasFollowingSpace(ch)) out += ' ';
             break;
-          }
-          case "pc": {
+          case "pc":
             out += `<span data-line-id="${currentLineId}">${ch.textContent}</span>`;
-            const next = nextTagName(ch);
-            if(next && !['pc','c','lb','l'].includes(next)) out += ' ';
+            if(!hasFollowingSpace(ch)) out += ' ';
             break;
-          }
           case "c":    out += " ";                          break;
           case "lb": {
             const id = ch.getAttribute('xml:id') || '';
@@ -243,7 +252,7 @@
 
           case "p":    out += teiToHtml(ch)+"<br><br>";     break;
 
-          case "speaker": {                                 // speaker then optional stage dir on same line :contentReference[oaicite:3]{index=3}
+          case "speaker": { // speaker then optional stage direction on the same line
             out += "<strong>"+teiToHtml(ch)+"</strong>";
             let next = ch.nextElementSibling;
             while(next && next.nodeType!==1){next = next.nextSibling;}
