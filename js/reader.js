@@ -219,6 +219,11 @@
             currentLineId = prev;
             break;
           }
+
+            break;
+          }
+          case "l":    out += teiToHtml(ch)+"<br>";         break;
+
           case "p":    out += teiToHtml(ch)+"<br><br>";     break;
 
           case "speaker": {                                 // speaker then optional stage dir on same line :contentReference[oaicite:3]{index=3}
@@ -312,9 +317,15 @@
     linePicker.innerHTML = '';
     linePicker.appendChild(new Option('Top',''));
     if(scene){
+
       scene.querySelectorAll('lb[n], l[n]').forEach(el=>{
         const n = el.getAttribute('n');
         const id = el.getAttribute('xml:id');
+
+      scene.querySelectorAll('lb[n]').forEach(lb=>{
+        const n = lb.getAttribute('n');
+        const id = lb.getAttribute('xml:id');
+
         if(n && id) linePicker.appendChild(new Option(n,id));
       });
     }
@@ -512,7 +523,12 @@
       const id = linePicker.value;
       closeSheet(contentsSheet);
       if(id){
+
         highlightLine(id);
+
+        const el = document.getElementById(id);
+        if(el) el.scrollIntoView();
+
       }else{
         window.scrollTo(0,0);
       }
@@ -569,7 +585,9 @@
   function openSheet(sheet){
     sheet.classList.add('open');
     contentsBtn.style.display = 'none';
+
     if(searchBtn) searchBtn.style.display = 'none';
+
     const focusable = sheet.querySelector('input,button,li,select');
     if(focusable) focusable.focus();
   }
