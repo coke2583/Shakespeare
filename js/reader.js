@@ -44,6 +44,10 @@
   const actPicker   = d? d.createElement('select') : {value:'all'};
   const scenePicker = d? d.createElement('select') : {value:'all'};
   const linePicker  = d? d.getElementById('linePicker') : {value:''};
+  const searchSheet = d? d.getElementById('searchSheet') : null;
+  const searchInput = searchSheet? searchSheet.querySelector('input[type=search]') : null;
+  const searchList  = searchSheet? searchSheet.querySelector('ul') : null;
+  const searchBtn   = d? d.querySelector('.search-btn') : {style:{display:'none'}};
   const viewer      = d? d.getElementById("viewer")  : {innerHTML:'',textContent:''};
   const castDiv     = d? d.getElementById("cast")    : {innerHTML:''};
   const nextBtn     = d? d.getElementById("nextBtn") : {style:{display:''}};
@@ -56,6 +60,11 @@
   const contentsBtn = d? d.querySelector('.contents-btn') : {style:{}};
   if(contentsBtn.style) contentsBtn.style.display = 'none';
   const header      = d? d.querySelector('header') : null;
+
+  /* cached lines for search */
+  let lines = [];
+  const lineNodes = new Map();
+  let currentLineId = '';
 
   /* copy-to-clipboard buttons */
   const announce = d? d.getElementById('announce') : {textContent:''};
@@ -88,6 +97,52 @@
   const parser      = (typeof DOMParser==='undefined') ? {parseFromString:()=>null} : new DOMParser();
   let   currentDoc  = null;
   let   castHtml    = "";
+
+  function nodeText(n){
+    if(n.nodeType===Node.TEXT_NODE) return n.nodeValue;
+    switch(n.nodeName){
+      case 'w':
+      case 'pc': return n.textContent;
+      case 'c':  return ' ';
+      default:   return Array.from(n.childNodes).map(nodeText).join('');
+    }
+  }
+
+  function getLineText(el){
+    return Array.from(el.childNodes).map(nodeText).join('').trim();
+  }
+
+  function extractLines(xml){
+    lines = [];
+    lineNodes.clear();
+    xml.querySelectorAll('l[n]').forEach(l=>{
+      const id  = l.getAttribute('xml:id') || '';
+      const ref = l.getAttribute('n') || '';
+      const text = getLineText(l);
+      lines.push({id, ref, text});
+      if(id) lineNodes.set(id, l);
+    });
+    xml.querySelectorAll('p').forEach(p=>{
+      let current = null;
+      let buf = '';
+      p.childNodes.forEach(ch=>{
+        if(ch.nodeName==='lb' && ch.getAttribute('n')){
+          if(current){
+            lines.push({id:current.id, ref:current.ref, text:buf.trim()});
+            if(current.id) lineNodes.set(current.id, current.node);
+          }
+          current = {id:ch.getAttribute('xml:id')||'', ref:ch.getAttribute('n')||'', node:ch};
+          buf = '';
+        }else if(current){
+          buf += nodeText(ch);
+        }
+      });
+      if(current){
+        lines.push({id:current.id, ref:current.ref, text:buf.trim()});
+        if(current.id) lineNodes.set(current.id, current.node);
+      }
+    });
+  }
 
   /* ----------- populate play list ------------- */
   if(playSheet && sheetList){
@@ -141,17 +196,34 @@
       }else{
         switch(ch.nodeName){
           case "w":
-            out += `<span class="lookup" data-word="${ch.textContent}">${ch.textContent}</span>`;
+            out += `<span class="lookup" data-word="${ch.textContent}" data-line-id="${currentLineId}">${ch.textContent}</span>`;
             break;
-          case "pc":   out += ch.textContent;               break;
+          case "pc":
+            out += `<span data-line-id="${currentLineId}">${ch.textContent}</span>`;
+            break;
           case "c":    out += " ";                          break;
           case "lb": {
             const id = ch.getAttribute('xml:id') || '';
             const n  = ch.getAttribute('n') || '';
             out += `<br id="${id}" data-line="${n}">`;
+            currentLineId = id;
+            break;
+          }
+          case "l": {
+            const prev = currentLineId;
+            const id = ch.getAttribute('xml:id') || '';
+            const n  = ch.getAttribute('n') || '';
+            currentLineId = id;
+            ch.childNodes.forEach(c=>{ out += teiToHtml(c); });
+            out += `<br id="${id}" data-line="${n}">`;
+            currentLineId = prev;
+            break;
+          }
+
             break;
           }
           case "l":    out += teiToHtml(ch)+"<br>";         break;
+
           case "p":    out += teiToHtml(ch)+"<br><br>";     break;
 
           case "speaker": {                                 // speaker then optional stage dir on same line :contentReference[oaicite:3]{index=3}
@@ -245,9 +317,15 @@
     linePicker.innerHTML = '';
     linePicker.appendChild(new Option('Top',''));
     if(scene){
+
+      scene.querySelectorAll('lb[n], l[n]').forEach(el=>{
+        const n = el.getAttribute('n');
+        const id = el.getAttribute('xml:id');
+
       scene.querySelectorAll('lb[n]').forEach(lb=>{
         const n = lb.getAttribute('n');
         const id = lb.getAttribute('xml:id');
+
         if(n && id) linePicker.appendChild(new Option(n,id));
       });
     }
@@ -396,6 +474,7 @@
       currentDoc = parser.parseFromString(xml, 'application/xml');
       const castList = currentDoc.querySelector("castList");
       castHtml = castList ? teiToHtml(castList) : "";
+      extractLines(currentDoc);
       populateActs(currentDoc);
       displayScene();
       contentsBtn.style.display = '';
@@ -444,8 +523,12 @@
       const id = linePicker.value;
       closeSheet(contentsSheet);
       if(id){
+
+        highlightLine(id);
+
         const el = document.getElementById(id);
         if(el) el.scrollIntoView();
+
       }else{
         window.scrollTo(0,0);
       }
@@ -455,6 +538,37 @@
   if(contentsSheet){
     contentsSheet.addEventListener('click',e=>{
       if(e.target===contentsSheet) closeSheet(contentsSheet);
+    });
+  }
+
+  if(searchBtn && searchBtn.addEventListener){
+    searchBtn.addEventListener('click',()=>openSheet(searchSheet));
+  }
+
+  if(searchSheet){
+    searchSheet.addEventListener('click',e=>{
+      if(e.target===searchSheet) closeSheet(searchSheet);
+    });
+  }
+
+  if(searchInput){
+    let timer=null;
+    searchInput.addEventListener('input',()=>{
+      clearTimeout(timer);
+      timer=setTimeout(()=>{
+        const term=searchInput.value.toLowerCase();
+        const hits=term?lines.filter(l=>l.text.toLowerCase().includes(term)):[];
+        renderSearchResults(hits);
+      },150);
+    });
+  }
+
+  if(searchList){
+    searchList.addEventListener('click',e=>{
+      const li=e.target.closest('li');
+      if(!li) return;
+      highlightLine(li.dataset.id);
+      closeSheet(searchSheet);
     });
   }
 
@@ -471,6 +585,9 @@
   function openSheet(sheet){
     sheet.classList.add('open');
     contentsBtn.style.display = 'none';
+
+    if(searchBtn) searchBtn.style.display = 'none';
+
     const focusable = sheet.querySelector('input,button,li,select');
     if(focusable) focusable.focus();
   }
@@ -479,6 +596,34 @@
     sheet.classList.remove('open');
     if(sheet===contentsSheet) displayScene();
     contentsBtn.style.display = '';
+    if(searchBtn) searchBtn.style.display = '';
+  }
+
+  function renderSearchResults(items){
+    if(!searchList) return;
+    searchList.innerHTML='';
+    items.forEach(l=>{
+      const li=document.createElement('li');
+      li.dataset.id=l.id;
+      const preview=l.text.slice(0,60);
+      li.innerHTML=`<div><strong>${l.ref}</strong></div><div>${preview}</div>`;
+      searchList.appendChild(li);
+    });
+  }
+
+  let activeHighlight=[];
+  function highlightLine(id){
+    activeHighlight.forEach(el=>el.classList.remove('line-hit'));
+    activeHighlight=[];
+    const anchor=document.getElementById(id);
+    if(anchor){
+      anchor.scrollIntoView();
+      viewer.querySelectorAll(`[data-line-id="${id}"]`).forEach(el=>{
+        el.classList.add('line-hit');
+        activeHighlight.push(el);
+      });
+      setTimeout(()=>activeHighlight.forEach(el=>el.classList.remove('line-hit')),3000);
+    }
   }
 
 

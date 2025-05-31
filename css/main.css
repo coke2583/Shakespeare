@@ -166,6 +166,17 @@ main{padding:var(--space);}
   background:var(--bg);color:var(--fg);
   font-size:1rem;
 }
+#searchSheet ul{list-style:none;margin:0;padding:0;}
+#searchSheet input[type=search]{
+  width:100%;margin-bottom:.5rem;
+  padding:.5rem;border-radius:var(--radius);
+  border:1px solid var(--accent-2);
+  background:var(--bg);color:var(--fg);
+}
+#searchSheet li{
+  padding:0.75rem 0;border-bottom:1px solid var(--accent-2);
+  cursor:pointer;min-height:48px;display:flex;align-items:center;
+}
 #playSheet li{
   padding:0.75rem 0;border-bottom:1px solid var(--accent-2);
   cursor:pointer;font-family:'Playfair Display',serif;
@@ -190,9 +201,17 @@ main{padding:var(--space);}
 
 /* hide floating button when a sheet is open */
 .sheet.open ~ .contents-btn{display:none;}
+.sheet.open ~ .search-btn{display:none;}
 
 .contents-btn{
   position:fixed;right:1rem;bottom:1rem;
+  padding:.5rem 1rem;border-radius:24px;
+  background:var(--accent);color:var(--bg);
+  font-family:'Playfair Display',serif;font-weight:600;
+  box-shadow:0 4px 12px #0004;border:none;cursor:pointer;
+}
+.search-btn{
+  position:fixed;left:1rem;bottom:1rem;
   padding:.5rem 1rem;border-radius:24px;
   background:var(--accent);color:var(--bg);
   font-family:'Playfair Display',serif;font-weight:600;
@@ -220,3 +239,11 @@ header.compact h1{font-size:1.25rem;transition:.3s;}
 
 /* ---------- act / scene titles ---------- */
 .act-title,.scene-title{font-family:'Playfair Display',serif;}
+
+.line-hit{
+  background:var(--accent-2);
+  color:var(--bg);
+  transition:background .3s ease;
+  animation:fadeFlash 3s forwards;
+}
+@keyframes fadeFlash{0%,60%{opacity:1}100%{opacity:0}}
