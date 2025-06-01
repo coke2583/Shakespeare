@@ -61,8 +61,16 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
   const sceneCtrl   = d? d.getElementById('sceneCtrl') : null;
   const contentsBtn = d? d.querySelector('.contents-btn') : {style:{}};
   if(contentsBtn.style) contentsBtn.style.display = 'none';
+
+const header      = d? d.querySelector('header') : null;
+const playTitle   = d? d.getElementById('playTitle') : {textContent:''};
+
   const header      = d? d.querySelector('header') : null;
+
   const playTitle   = d? d.getElementById('playTitle') : {textContent:''};
+
+  const playTitleEl = d? d.getElementById('playTitle') : {textContent:''};
+
 
   /* cached lines for search */
   let lines = [];
@@ -339,7 +347,22 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
   }
 
   /* --------------- main load ------------------ */
+
+async function loadPlay(file){
+    const title = file.replace(/_TEIsimple_FolgerShakespeare\.xml$/, '')
+                      .replace(/-/g, ' ')
+                      .replace(/\b\w/g, c => c.toUpperCase());
+    playTitle.textContent = title;
+
   async function loadPlay(file){
+    const title = file.replace(/_TEIsimple_FolgerShakespeare\.xml$/,"")
+                      .replace(/-/g, " ")
+                      .replace(/\b\w/g, c => c.toUpperCase());
+    playTitleEl.textContent = title;
+    if(typeof document !== 'undefined'){
+      document.title = `Shakespeare Reader – ${title}`;
+    }
+
     contentsBtn.style.display = 'none';
     viewer.textContent = 'Loading… 0 %';
     try{
