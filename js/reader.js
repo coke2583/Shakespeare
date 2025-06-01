@@ -62,6 +62,7 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
   const contentsBtn = d? d.querySelector('.contents-btn') : {style:{}};
   if(contentsBtn.style) contentsBtn.style.display = 'none';
   const header      = d? d.querySelector('header') : null;
+  const playTitle   = d? d.getElementById('playTitle') : {textContent:''};
 
   /* cached lines for search */
   let lines = [];
@@ -157,6 +158,7 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
       const li = e.target.closest('li');
       if(!li) return;
       closeSheet(playSheet);
+      if(playTitle) playTitle.textContent = li.textContent;
       loadPlay(li.dataset.file);
     });
 
