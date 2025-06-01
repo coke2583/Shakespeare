@@ -66,6 +66,9 @@ const header      = d? d.querySelector('header') : null;
 const playTitle   = d? d.getElementById('playTitle') : {textContent:''};
 
   const header      = d? d.querySelector('header') : null;
+
+  const playTitle   = d? d.getElementById('playTitle') : {textContent:''};
+
   const playTitleEl = d? d.getElementById('playTitle') : {textContent:''};
 
 
@@ -163,6 +166,7 @@ const playTitle   = d? d.getElementById('playTitle') : {textContent:''};
       const li = e.target.closest('li');
       if(!li) return;
       closeSheet(playSheet);
+      if(playTitle) playTitle.textContent = li.textContent;
       loadPlay(li.dataset.file);
     });
 
