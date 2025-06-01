@@ -21,9 +21,6 @@ export function getLineText(el) {
   return Array.from(el.childNodes).map(nodeText).join('').trim();
 }
 
-// Track the current line id while building HTML
-let currentLineId = '';
-
 // Convert a TEI node to the HTML used by the reader
 export function teiToHtml(node) {
   if (!node) return '';
@@ -42,22 +39,10 @@ export function teiToHtml(node) {
     } else {
       switch (ch.nodeName) {
         case 'w':
-          out += `<span class="lookup" data-word="${ch.textContent}" data-line-id="${currentLineId}">${ch.textContent}</span>`;
-          {
-            const next = ch.nextSibling;
-            const mustBreak = next && /^(lb|l)$/.test(next.nodeName);
-            const explicitSpace = next && next.nodeName === 'c';
-            if (!mustBreak && !explicitSpace) out += ' ';
-          }
+          out += `<span class="lookup" data-word="${ch.textContent}">${ch.textContent}</span>`;
           break;
         case 'pc':
-          out += `<span data-line-id="${currentLineId}">${ch.textContent}</span>`;
-          {
-            const next = ch.nextSibling;
-            const mustBreak = next && /^(lb|l)$/.test(next.nodeName);
-            const explicitSpace = next && next.nodeName === 'c';
-            if (!mustBreak && !explicitSpace) out += ' ';
-          }
+          out += ch.textContent;
           break;
         case 'c':
           out += ' ';
@@ -66,21 +51,11 @@ export function teiToHtml(node) {
           const id = ch.getAttribute('xml:id') || '';
           const n = ch.getAttribute('n') || '';
           out += `<br id="${id}" data-line="${n}">`;
-          currentLineId = id;
           break;
         }
-        case 'l': {
-          const prev = currentLineId;
-          const id = ch.getAttribute('xml:id') || '';
-          const n = ch.getAttribute('n') || '';
-          currentLineId = id;
-          ch.childNodes.forEach(c => {
-            out += teiToHtml(c);
-          });
-          out += `<br id="${id}" data-line="${n}">`;
-          currentLineId = prev;
+        case 'l':
+          out += teiToHtml(ch) + '<br>';
           break;
-        }
         case 'p':
           out += teiToHtml(ch) + '<br><br>';
           break;
