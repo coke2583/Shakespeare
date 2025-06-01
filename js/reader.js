@@ -68,7 +68,6 @@ const playTitle   = d? d.getElementById('playTitle') : {textContent:''};
   const header      = d? d.querySelector('header') : null;
   const playTitleEl = d? d.getElementById('playTitle') : {textContent:''};
 
-
   /* cached lines for search */
   let lines = [];
   const lineNodes = new Map();
@@ -351,6 +350,15 @@ async function loadPlay(file){
     playTitle.textContent = title;
 
   async function loadPlay(file){
+
+    const title = file.replace(/_TEIsimple_FolgerShakespeare\.xml$/, '')
+                      .replace(/-/g, ' ')
+                      .replace(/\b\w/g, c => c.toUpperCase());
+    playTitleEl.textContent = title;
+    if(typeof document !== 'undefined'){
+      document.title = `Shakespeare Reader \u2013 ${title}`;
+    }
+
     const title = file.replace(/_TEIsimple_FolgerShakespeare\.xml$/,"")
                       .replace(/-/g, " ")
                       .replace(/\b\w/g, c => c.toUpperCase());
@@ -358,6 +366,7 @@ async function loadPlay(file){
     if(typeof document !== 'undefined'){
       document.title = `Shakespeare Reader – ${title}`;
     }
+
 
     contentsBtn.style.display = 'none';
     viewer.textContent = 'Loading… 0 %';
