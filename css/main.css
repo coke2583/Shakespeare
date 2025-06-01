@@ -236,7 +236,7 @@ header.compact h1{font-size:1.25rem;transition:.3s;}
   box-shadow:0 2px 6px rgba(0,0,0,.3);z-index:1000;
 }
 .lookup{cursor:help;}
-.lookup::after{content:" ";}
+
 
 /* ---------- act / scene titles ---------- */
 .act-title,.scene-title{font-family:'Playfair Display',serif;}
