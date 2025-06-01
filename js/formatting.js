@@ -15,25 +15,6 @@ export function nodeText(n) {
   }
 }
 
-function hasFollowingSpace(node) {
-  let next = node.nextSibling;
-  while (next) {
-    if (next.nodeType === Node.TEXT_NODE && next.nodeValue.trim() === '') {
-      next = next.nextSibling;
-      continue;
-    }
-    return next && (next.nodeName === 'c' || next.nodeName === 'lb' || next.nodeName === 'l');
-  }
-  return false;
-}
-
-function needsSpace(node) {
-  let nxt = node.nextSibling;
-  while (nxt && nxt.nodeType === Node.TEXT_NODE && !/\S/.test(nxt.nodeValue)) {
-    nxt = nxt.nextSibling;
-  }
-  return nxt && nxt.nodeName === 'w';
-}
 
 // Get a line of text from a TEI element
 export function getLineText(el) {
@@ -62,12 +43,21 @@ export function teiToHtml(node) {
       switch (ch.nodeName) {
         case 'w':
           out += `<span class="lookup" data-word="${ch.textContent}" data-line-id="${currentLineId}">${ch.textContent}</span>`;
-          if (needsSpace(ch)) out += ' ';
-          if (!hasFollowingSpace(ch)) out += ' ';
+          {
+            const next = ch.nextSibling;
+            const mustBreak = next && /^(lb|l)$/.test(next.nodeName);
+            const explicitSpace = next && next.nodeName === 'c';
+            if (!mustBreak && !explicitSpace) out += ' ';
+          }
           break;
         case 'pc':
           out += `<span data-line-id="${currentLineId}">${ch.textContent}</span>`;
-          if (!hasFollowingSpace(ch)) out += ' ';
+          {
+            const next = ch.nextSibling;
+            const mustBreak = next && /^(lb|l)$/.test(next.nodeName);
+            const explicitSpace = next && next.nodeName === 'c';
+            if (!mustBreak && !explicitSpace) out += ' ';
+          }
           break;
         case 'c':
           out += ' ';
