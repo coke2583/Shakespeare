@@ -61,7 +61,8 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
   const sceneCtrl   = d? d.getElementById('sceneCtrl') : null;
   const contentsBtn = d? d.querySelector('.contents-btn') : {style:{}};
   if(contentsBtn.style) contentsBtn.style.display = 'none';
-  const header      = d? d.querySelector('header') : null;
+const header      = d? d.querySelector('header') : null;
+const playTitle   = d? d.getElementById('playTitle') : {textContent:''};
 
   /* cached lines for search */
   let lines = [];
@@ -337,7 +338,11 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
   }
 
   /* --------------- main load ------------------ */
-  async function loadPlay(file){
+async function loadPlay(file){
+    const title = file.replace(/_TEIsimple_FolgerShakespeare\.xml$/, '')
+                      .replace(/-/g, ' ')
+                      .replace(/\b\w/g, c => c.toUpperCase());
+    playTitle.textContent = title;
     contentsBtn.style.display = 'none';
     viewer.textContent = 'Loading… 0 %';
     try{
