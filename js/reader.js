@@ -524,6 +524,37 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
 
   function insertLineNumbers(){
     if(!viewer) return;
+
+    const brs = Array.from(viewer.querySelectorAll('br[data-line]'));
+    brs.forEach(br=>{
+      const line = br.getAttribute('data-line');
+      const row  = document.createElement('div');
+      row.className = 'line-row';
+      row.dataset.lineId = br.id;
+
+      const textSpan = document.createElement('span');
+      textSpan.className = 'line-text';
+      let node = br.nextSibling;
+      while(node && !(node.nodeName === 'BR' && node.getAttribute('data-line'))){
+        const next = node.nextSibling;
+        textSpan.appendChild(node);
+        node = next;
+      }
+
+      const numSpan = document.createElement('span');
+      numSpan.className = 'line-num';
+      const num = parseInt(line.split('.').pop(),10);
+      if(num % 5 === 0){
+        numSpan.textContent = line;
+      } else {
+        numSpan.textContent = '';
+      }
+
+      row.appendChild(textSpan);
+      row.appendChild(numSpan);
+
+      br.after(row);
+
     viewer.querySelectorAll('.line-num').forEach(n=>n.remove());
     const brs = viewer.querySelectorAll('br[data-line]');
     brs.forEach(br=>{
@@ -537,6 +568,7 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
         span.dataset.lineId=br.id;
         br.after(span,' ');
       }
+
     });
   }
 
