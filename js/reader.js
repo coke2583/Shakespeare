@@ -250,6 +250,7 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
     }
 
     viewer.innerHTML = html;
+    insertLineNumbers();
     castDiv.innerHTML = "";
 
     populateLines(currentScene);
@@ -519,6 +520,40 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
       });
       setTimeout(()=>activeHighlight.forEach(el=>el.classList.remove('line-hit')),3000);
     }
+  }
+
+  function insertLineNumbers(){
+    if(!viewer) return;
+    const brs = Array.from(viewer.querySelectorAll('br[data-line]'));
+    brs.forEach(br=>{
+      const line = br.getAttribute('data-line');
+      const row  = document.createElement('span');
+      row.className = 'line-row';
+      row.dataset.lineId = br.id;
+
+      const textSpan = document.createElement('span');
+      textSpan.className = 'line-text';
+      let node = br.nextSibling;
+      while(node && !(node.nodeName === 'BR' && node.getAttribute('data-line'))){
+        const next = node.nextSibling;
+        textSpan.appendChild(node);
+        node = next;
+      }
+
+      const numSpan = document.createElement('span');
+      numSpan.className = 'line-num';
+      const num = parseInt(line.split('.').pop(),10);
+      if(num % 5 === 0){
+        numSpan.textContent = line;
+      } else {
+        numSpan.textContent = '';
+      }
+
+      row.appendChild(textSpan);
+      row.appendChild(numSpan);
+
+      br.after(row);
+    });
   }
 
 
