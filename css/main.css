@@ -236,6 +236,7 @@ header.compact .play-title{font-size:1rem;transition:.3s;}
 .tooltip{
   position:fixed;max-width:60ch;background:var(--bg);color:var(--fg);
   padding:0.5rem;border-radius:var(--radius);
+  border:1px solid var(--accent);
   box-shadow:0 2px 6px rgba(0,0,0,.3);z-index:1000;
 }
 .lookup{cursor:help;}
