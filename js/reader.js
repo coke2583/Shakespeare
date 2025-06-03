@@ -250,6 +250,7 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
     }
 
     viewer.innerHTML = html;
+    insertLineNumbers();
     castDiv.innerHTML = "";
 
     populateLines(currentScene);
@@ -519,6 +520,24 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
       });
       setTimeout(()=>activeHighlight.forEach(el=>el.classList.remove('line-hit')),3000);
     }
+  }
+
+  function insertLineNumbers(){
+    if(!viewer) return;
+    viewer.querySelectorAll('.line-num').forEach(n=>n.remove());
+    const brs = viewer.querySelectorAll('br[data-line]');
+    brs.forEach(br=>{
+      const n = br.getAttribute('data-line');
+      if(!n) return;
+      const num = parseInt(n.split('.').pop(),10);
+      if(num % 5 === 0){
+        const span=document.createElement('span');
+        span.className='line-num';
+        span.textContent=n;
+        span.dataset.lineId=br.id;
+        br.after(span,' ');
+      }
+    });
   }
 
 
