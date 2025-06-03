@@ -252,6 +252,7 @@ header.compact .play-title{font-size:1rem;transition:.3s;}
 }
 @keyframes fadeFlash{0%,60%{opacity:1}100%{opacity:0}}
 
+
 .line-row{
   display:flex;
   align-items:flex-start;
@@ -264,6 +265,12 @@ header.compact .play-title{font-size:1rem;transition:.3s;}
   width:4ch;
   margin-left:0.5rem;
   text-align:right;
+
+.line-num{
+  display:inline-block;
+  width:4ch;
+  margin-right:0.25rem;
+
   color:var(--accent-2);
   font-size:0.8em;
   user-select:none;
