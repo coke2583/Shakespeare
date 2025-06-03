@@ -251,3 +251,12 @@ header.compact .play-title{font-size:1rem;transition:.3s;}
   animation:fadeFlash 3s forwards;
 }
 @keyframes fadeFlash{0%,60%{opacity:1}100%{opacity:0}}
+
+.line-num{
+  display:inline-block;
+  width:4ch;
+  margin-right:0.25rem;
+  color:var(--accent-2);
+  font-size:0.8em;
+  user-select:none;
+}
