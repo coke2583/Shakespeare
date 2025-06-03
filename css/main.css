@@ -78,7 +78,8 @@ h2{font-size:clamp(1.5rem,1vw + 1rem,2.25rem);font-weight:700;}
 }
 
 /* ---------- reader typography ---------- */
-#viewer{white-space:pre-wrap;}
+#viewer{white-space:pre-wrap;font-size:var(--play-font-size,1rem);}
+#cast{font-size:var(--play-font-size,1rem);}
 .speech{position:relative;margin-bottom:var(--space);}
 .copy-btn{
   margin-left:0.5rem;
@@ -202,6 +203,7 @@ main{padding:var(--space);}
 /* hide floating button when a sheet is open */
 .sheet.open ~ .contents-btn{display:none;}
 .sheet.open ~ .search-btn{display:none;}
+.sheet.open ~ .size-btn{display:none;}
 
 .contents-btn{
   position:fixed;right:1rem;bottom:1rem;
@@ -212,6 +214,13 @@ main{padding:var(--space);}
 }
 .search-btn{
   position:fixed;left:1rem;bottom:1rem;
+  padding:.5rem 1rem;border-radius:24px;
+  background:var(--accent);color:var(--bg);
+  font-family:'Playfair Display',serif;font-weight:600;
+  box-shadow:0 4px 12px #0004;border:none;cursor:pointer;
+}
+.size-btn{
+  position:fixed;left:50%;bottom:1rem;transform:translateX(-50%);
   padding:.5rem 1rem;border-radius:24px;
   background:var(--accent);color:var(--bg);
   font-family:'Playfair Display',serif;font-weight:600;
