@@ -50,6 +50,7 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
   const searchInput = searchSheet ? searchSheet.querySelector('input[type=search]') : null;
   const searchList  = searchSheet ? searchSheet.querySelector('ul') : null;
   const searchBtn   = d? d.querySelector('.search-btn') : {style:{display:'none'}};
+  const sizeBtn     = d? d.querySelector('.size-btn') : {style:{display:'none'}};
   const viewer      = d? d.getElementById("viewer")  : {innerHTML:'',textContent:''};
   const castDiv     = d? d.getElementById("cast")    : {innerHTML:''};
   const nextBtn     = d? d.getElementById("nextBtn") : {style:{display:''}};
@@ -57,6 +58,8 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
   const playSearch  = playSheet? playSheet.querySelector('input[type=search]') : null;
   const sheetList   = playSheet? playSheet.querySelector('ul') : null;
   const contentsSheet = d? d.getElementById('contentsSheet') : null;
+  const sizeSheet   = d? d.getElementById('sizeSheet') : null;
+  const sizeRange   = sizeSheet? sizeSheet.querySelector('input[type=range]') : null;
   const actCtrl     = d? d.getElementById('actCtrl') : null;
   const sceneCtrl   = d? d.getElementById('sceneCtrl') : null;
   const contentsBtn = d? d.querySelector('.contents-btn') : {style:{}};
@@ -468,6 +471,31 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
     });
   }
 
+  if(sizeBtn && sizeBtn.addEventListener){
+    sizeBtn.addEventListener('click',()=>openSheet(sizeSheet));
+  }
+
+  if(sizeSheet){
+    sizeSheet.addEventListener('click',e=>{
+      if(e.target===sizeSheet) closeSheet(sizeSheet);
+    });
+  }
+
+  function updateFontSize(){
+    if(!sizeRange) return;
+    const val=parseInt(sizeRange.value,10);
+    if(viewer) viewer.style.fontSize=val+'px';
+    if(castDiv) castDiv.style.fontSize=val+'px';
+    if(typeof document!=='undefined'){
+      document.documentElement.style.setProperty('--play-font-size', val+'px');
+    }
+  }
+
+  if(sizeRange){
+    sizeRange.addEventListener('input',updateFontSize);
+    updateFontSize();
+  }
+
   if(typeof window!=='undefined'){
     window.addEventListener('scroll',()=>{
       if(scrollY>80 && header && !header.classList.contains('compact')){
@@ -483,6 +511,7 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
     contentsBtn.style.display = 'none';
 
     if(searchBtn) searchBtn.style.display = 'none';
+    if(sizeBtn) sizeBtn.style.display = 'none';
 
     const focusable = sheet.querySelector('input,button,li,select');
     if(focusable) focusable.focus();
@@ -493,6 +522,7 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
     if(sheet===contentsSheet) displayScene();
     contentsBtn.style.display = '';
     if(searchBtn) searchBtn.style.display = '';
+    if(sizeBtn) sizeBtn.style.display = '';
   }
 
   function renderSearchResults(items){
