@@ -528,7 +528,14 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
     const brs = Array.from(viewer.querySelectorAll('br[data-line]'));
     brs.forEach(br=>{
       const line = br.getAttribute('data-line');
+      const row  = document.createElement('span');
+
+
+    const brs = Array.from(viewer.querySelectorAll('br[data-line]'));
+    brs.forEach(br=>{
+      const line = br.getAttribute('data-line');
       const row  = document.createElement('div');
+
       row.className = 'line-row';
       row.dataset.lineId = br.id;
 
@@ -555,6 +562,7 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
 
       br.after(row);
 
+
     viewer.querySelectorAll('.line-num').forEach(n=>n.remove());
     const brs = viewer.querySelectorAll('br[data-line]');
     brs.forEach(br=>{
@@ -568,6 +576,7 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
         span.dataset.lineId=br.id;
         br.after(span,' ');
       }
+
 
     });
   }

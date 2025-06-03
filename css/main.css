@@ -254,8 +254,15 @@ header.compact .play-title{font-size:1rem;transition:.3s;}
 
 
 .line-row{
+  display:inline-flex;
+  align-items:flex-start;
+  width:100%;
+
+
+.line-row{
   display:flex;
   align-items:flex-start;
+
 }
 .line-text{
   flex:1 1 auto;
@@ -265,6 +272,7 @@ header.compact .play-title{font-size:1rem;transition:.3s;}
   width:4ch;
   margin-left:0.5rem;
   text-align:right;
+
 
 .line-num{
   display:inline-block;
