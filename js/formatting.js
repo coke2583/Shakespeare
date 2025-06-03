@@ -53,9 +53,12 @@ export function teiToHtml(node) {
           out += `<br id="${id}" data-line="${n}">`;
           break;
         }
-        case 'l':
-          out += teiToHtml(ch) + '<br>';
+        case 'l': {
+          const id = ch.getAttribute('xml:id') || '';
+          const n  = ch.getAttribute('n') || '';
+          out += teiToHtml(ch) + `<br id="${id}" data-line="${n}">`;
           break;
+        }
         case 'p':
           out += teiToHtml(ch) + '<br><br>';
           break;
