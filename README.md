@@ -17,7 +17,7 @@ filename to the `plays` array inside `js/reader.js`.
 
 ## Bookmarking progress
 
-Your reading position is automatically saved in the browser. The reader will
-reopen the last play, act and scene you viewed and scroll to the same spot the
-next time you visit.
+Your position within each play is saved in the browser. When you load the
+reader you will always start at the play selection screen, but a **Resume
+Reading** button lets you jump back to the play and line you last viewed.
 
