@@ -497,6 +497,7 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
 
   if(sizeRange){
     sizeRange.addEventListener('input',updateFontSize);
+    sizeRange.addEventListener('change',()=>closeSheet(sizeSheet));
     updateFontSize();
   }
 
