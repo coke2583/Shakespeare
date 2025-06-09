@@ -151,7 +151,7 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
       sheetList.appendChild(li);
     });
 
-    if(!localStorage.getItem('readerProgress')) openSheet(playSheet);
+    openSheet(playSheet);
 
     playSearch.addEventListener('input',()=>{
       const term = playSearch.value.toLowerCase();
@@ -164,7 +164,7 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
       const li = e.target.closest('li');
       if(!li) return;
       closeSheet(playSheet);
-      loadPlay(li.dataset.file);
+      loadProgress(true, li.dataset.file);
     });
 
     playSheet.addEventListener('click',e=>{
@@ -602,43 +602,65 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
     });
   }
 
+  const PROGRESS_KEY = 'readerProgress';
+
+  function getProgressData(){
+    let data=null;
+    try{data=JSON.parse(localStorage.getItem(PROGRESS_KEY)||'{}');}catch(e){data={};}
+    if(!data || typeof data!=='object') data={};
+    // upgrade old format
+    if(!data.plays && data.file){
+      data={lastFile:data.file, plays:{[data.file]:{
+        act:data.act, scene:data.scene, line:data.line, scroll:data.scroll
+      }}};
+    }
+    if(!data.plays) data.plays={};
+    return data;
+  }
+
   function saveProgress(){
     if(!currentDoc || !currentFile) return;
-    const data={
-      file:currentFile,
+    const data=getProgressData();
+    data.lastFile=currentFile;
+    data.plays[currentFile]={
       act:actPicker.value,
       scene:scenePicker.value,
       line:linePicker?linePicker.value:'',
       scroll:typeof scrollY==='number'?scrollY:0
     };
-    try{localStorage.setItem('readerProgress',JSON.stringify(data));}catch(e){}
+    try{localStorage.setItem(PROGRESS_KEY,JSON.stringify(data));}catch(e){}
   }
 
-  async function loadProgress(apply=true){
-    let data=null;
-    try{data=JSON.parse(localStorage.getItem('readerProgress')||'null');}catch(e){return null;}
-    if(!data||!data.file||!plays.includes(data.file)) return null;
-    if(resumeBtn) resumeBtn.style.display='';
-    if(!apply) return data;
-    await loadPlay(data.file);
-    const acts=currentDoc.querySelectorAll('body div[type="act"]');
-    actPicker.value=data.act;
-    const act=data.act==='all'?null:acts[+data.act];
-    populateScenes(act);
-    scenePicker.value=data.scene;
-    displayScene();
-    if(data.line){
-      linePicker.value=data.line;
-      highlightLine(data.line);
+  async function loadProgress(apply=true,file=null){
+    const data=getProgressData();
+    const f=file||data.lastFile;
+    const prog=f?data.plays[f]:null;
+    if(!f||!plays.includes(f)) return null;
+    if(resumeBtn && prog) resumeBtn.style.display='';
+    if(!apply){
+      return prog?{file:f,...prog}:null;
     }
-    window.scrollTo(0,data.scroll||0);
+    await loadPlay(f);
+    if(prog){
+      const acts=currentDoc.querySelectorAll('body div[type="act"]');
+      actPicker.value=prog.act;
+      const act=prog.act==='all'?null:acts[+prog.act];
+      populateScenes(act);
+      scenePicker.value=prog.scene;
+      displayScene();
+      if(prog.line){
+        linePicker.value=prog.line;
+        highlightLine(prog.line);
+      }
+      window.scrollTo(0,prog.scroll||0);
+    }
     closeSheet(playSheet);
-    return data;
+    return prog?{file:f,...prog}:{file:f};
   }
 
   if(typeof window!=='undefined'){
     window.addEventListener('beforeunload',saveProgress);
-    loadProgress();
+    loadProgress(false);
   }
 
   if(resumeBtn&&resumeBtn.addEventListener){
