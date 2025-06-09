@@ -27,6 +27,7 @@ body{
   background:var(--bg);
   color:var(--fg);
 }
+body.noscroll{height:100vh;overflow:hidden;}
 h1,h2,h3{
   font-family:'Playfair Display',serif;
   margin:0 0 var(--space);
@@ -159,13 +160,18 @@ main{padding:var(--space);}
   max-height:60vh;overflow-y:auto;
 }
 .sheet.open{transform:none;}
+#searchSheet .sheet-close{
+  position:absolute;top:0.25rem;right:0.5rem;
+  background:none;border:none;font-size:1.5rem;
+  color:var(--fg);cursor:pointer;
+}
 #playSheet ul{list-style:none;margin:0;padding:0;}
 #playSheet input[type=search]{
   width:100%;margin-bottom:.5rem;
   padding:.5rem;border-radius:var(--radius);
   border:1px solid var(--accent-2);
   background:var(--bg);color:var(--fg);
-  font-size:1rem;
+  font-size:16px;
 }
 #searchSheet ul{list-style:none;margin:0;padding:0;}
 #searchSheet input[type=search]{
@@ -173,6 +179,7 @@ main{padding:var(--space);}
   padding:.5rem;border-radius:var(--radius);
   border:1px solid var(--accent-2);
   background:var(--bg);color:var(--fg);
+  font-size:16px;
 }
 #searchSheet li{
   padding:0.75rem 0;border-bottom:1px solid var(--accent-2);
