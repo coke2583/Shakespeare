@@ -264,9 +264,11 @@ header.compact .play-title{font-size:1rem;transition:.3s;}
 
 .line-num{
   display:inline-block;
-  width:4ch;
+  min-width:4ch;
+  width:auto;
   margin-right:0.25rem;
   color:var(--accent-2);
   font-size:0.8em;
   user-select:none;
+  text-align:right;
 }
