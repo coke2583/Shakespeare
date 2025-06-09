@@ -487,11 +487,31 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
 
   function updateFontSize(){
     if(!sizeRange) return;
-    const val=parseInt(sizeRange.value,10);
-    if(viewer) viewer.style.fontSize=val+'px';
-    if(castDiv) castDiv.style.fontSize=val+'px';
+    let offset = 0;
+    let topId = '';
+    let topEl = null;
+    if(typeof document!=='undefined' && header){
+      const y = header.offsetHeight + 1;
+      topEl = document.elementFromPoint(0, y);
+      if(topEl){
+        offset = topEl.getBoundingClientRect().top;
+        topId = topEl.id || '';
+      }
+    }
+
+    const val = parseInt(sizeRange.value, 10);
+    if(viewer) viewer.style.fontSize = val + 'px';
+    if(castDiv) castDiv.style.fontSize = val + 'px';
     if(typeof document!=='undefined'){
       document.documentElement.style.setProperty('--play-font-size', val+'px');
+    }
+
+    if(topEl){
+      const target = topId ? document.getElementById(topId) : topEl;
+      if(target && target.scrollIntoView){
+        target.scrollIntoView({block:'start'});
+        window.scrollBy(0, offset);
+      }
     }
   }
 
