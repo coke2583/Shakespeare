@@ -49,6 +49,7 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
   const searchSheet = d? d.getElementById('searchSheet') : null;
   const searchInput = searchSheet ? searchSheet.querySelector('input[type=search]') : null;
   const searchList  = searchSheet ? searchSheet.querySelector('ul') : null;
+  const searchClose = searchSheet ? searchSheet.querySelector('.sheet-close') : null;
   const searchBtn   = d? d.querySelector('.search-btn') : {style:{display:'none'}};
   const sizeBtn     = d? d.querySelector('.size-btn') : {style:{display:'none'}};
   const viewer      = d? d.getElementById("viewer")  : {innerHTML:'',textContent:''};
@@ -454,6 +455,10 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
     });
   }
 
+  if(searchClose){
+    searchClose.addEventListener('click',()=>closeSheet(searchSheet));
+  }
+
   if(searchInput){
     let timer=null;
     searchInput.addEventListener('input',()=>{
@@ -537,6 +542,7 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
 
     if(searchBtn) searchBtn.style.display = 'none';
     if(sizeBtn) sizeBtn.style.display = 'none';
+    document.body.classList.add('noscroll');
 
     const focusable = sheet.querySelector('input,button,li,select');
     if(focusable) focusable.focus();
@@ -548,6 +554,7 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
     contentsBtn.style.display = '';
     if(searchBtn) searchBtn.style.display = '';
     if(sizeBtn) sizeBtn.style.display = '';
+    document.body.classList.remove('noscroll');
   }
 
   function renderSearchResults(items){
