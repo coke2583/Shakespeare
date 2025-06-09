@@ -204,6 +204,7 @@ main{padding:var(--space);}
 .sheet.open ~ .contents-btn{display:none;}
 .sheet.open ~ .search-btn{display:none;}
 .sheet.open ~ .size-btn{display:none;}
+.sheet.open ~ .resume-btn{display:none;}
 
 .contents-btn{
   position:fixed;right:1rem;bottom:1rem;
@@ -225,6 +226,14 @@ main{padding:var(--space);}
   background:var(--accent);color:var(--bg);
   font-family:'Playfair Display',serif;font-weight:600;
   box-shadow:0 4px 12px #0004;border:none;cursor:pointer;
+}
+.resume-btn{
+  position:fixed;right:1rem;bottom:4.5rem;
+  padding:.5rem 1rem;border-radius:24px;
+  background:var(--accent);color:var(--bg);
+  font-family:'Playfair Display',serif;font-weight:600;
+  box-shadow:0 4px 12px #0004;border:none;cursor:pointer;
+  display:none;
 }
 
 /* ---------- sticky header ---------- */

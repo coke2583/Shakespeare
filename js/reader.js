@@ -64,6 +64,7 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
   const sceneCtrl   = d? d.getElementById('sceneCtrl') : null;
   const contentsBtn = d? d.querySelector('.contents-btn') : {style:{}};
   if(contentsBtn.style) contentsBtn.style.display = 'none';
+  const resumeBtn   = d? d.getElementById('resumeBtn') : null;
   const header      = d? d.querySelector('header') : null;
   const playTitleEl = d? d.getElementById('playTitle') : {textContent:''};
 
@@ -102,6 +103,7 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
   const parser      = (typeof DOMParser==='undefined') ? {parseFromString:()=>null} : new DOMParser();
   let   currentDoc  = null;
   let   castHtml    = "";
+  let   currentFile = null;
 
 
   function extractLines(xml){
@@ -148,7 +150,7 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
       sheetList.appendChild(li);
     });
 
-    openSheet(playSheet);
+    if(!localStorage.getItem('readerProgress')) openSheet(playSheet);
 
     playSearch.addEventListener('input',()=>{
       const term = playSearch.value.toLowerCase();
@@ -343,6 +345,7 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
 
   /* --------------- main load ------------------ */
   async function loadPlay(file){
+    currentFile = file;
     const title = file.replace(/_TEIsimple_FolgerShakespeare\.xml$/,"")
                       .replace(/-/g, " ")
                       .replace(/\b\w/g, c => c.toUpperCase());
@@ -377,6 +380,7 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
       populateActs(currentDoc);
       displayScene();
       contentsBtn.style.display = '';
+      saveProgress();
     }catch(e){
       viewer.textContent = "❌ "+e;
       console.error(e);
@@ -568,6 +572,49 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
         br.after(span,' ');
       }
     });
+  }
+
+  function saveProgress(){
+    if(!currentDoc || !currentFile) return;
+    const data={
+      file:currentFile,
+      act:actPicker.value,
+      scene:scenePicker.value,
+      line:linePicker?linePicker.value:'',
+      scroll:typeof scrollY==='number'?scrollY:0
+    };
+    try{localStorage.setItem('readerProgress',JSON.stringify(data));}catch(e){}
+  }
+
+  async function loadProgress(apply=true){
+    let data=null;
+    try{data=JSON.parse(localStorage.getItem('readerProgress')||'null');}catch(e){return null;}
+    if(!data||!data.file||!plays.includes(data.file)) return null;
+    if(resumeBtn) resumeBtn.style.display='';
+    if(!apply) return data;
+    await loadPlay(data.file);
+    const acts=currentDoc.querySelectorAll('body div[type="act"]');
+    actPicker.value=data.act;
+    const act=data.act==='all'?null:acts[+data.act];
+    populateScenes(act);
+    scenePicker.value=data.scene;
+    displayScene();
+    if(data.line){
+      linePicker.value=data.line;
+      highlightLine(data.line);
+    }
+    window.scrollTo(0,data.scroll||0);
+    closeSheet(playSheet);
+    return data;
+  }
+
+  if(typeof window!=='undefined'){
+    window.addEventListener('beforeunload',saveProgress);
+    loadProgress();
+  }
+
+  if(resumeBtn&&resumeBtn.addEventListener){
+    resumeBtn.addEventListener('click',()=>loadProgress());
   }
 
 
