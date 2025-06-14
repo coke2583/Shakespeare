@@ -12,6 +12,8 @@ export function nodeText(n) {
       return n.textContent;
     case 'c':
       return ' ';
+    case 'lb':
+      return ' ';
     default:
       return Array.from(n.childNodes).map(nodeText).join('');
   }
