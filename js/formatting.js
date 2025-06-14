@@ -27,13 +27,11 @@ function emitTokens(parent){
     if(node.nodeName === 'w'){
       const ref = node.getAttribute('n') || '';
       html.push(`<span class="word" data-ref="${ref}">${node.textContent}</span>`);
-      html.push(' ');
     }else if(node.nodeName === 'pc'){
       if(html[html.length-1] === ' ') html.pop();
       html.push(node.textContent);
-      html.push(' ');
     }else if(node.nodeName === 'c'){
-      html.push(' ');
+      if(html[html.length-1] !== ' ') html.push(' ');
     }else{
       html.push(teiToHtml(node));
     }
