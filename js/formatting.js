@@ -133,7 +133,7 @@ export function teiToHtml(node) {
             else speech += teiToHtml(child);
           });
           out += '<p class="speech"><span class="speech-text">' + speech + '</span>' +
-            '<button class="copy-btn" aria-label="Copy">' +
+            '<button class="copy-btn" type="button" aria-label="Copy this speech" title="Copy">' +
             '<img class="icon copy" src="assets/copyIcon.png" alt="">' +
             '<img class="icon check" src="assets/tick.png" alt="">' +
             '</button></p>';
