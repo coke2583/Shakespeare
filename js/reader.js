@@ -342,6 +342,7 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
     document.addEventListener('click',e=>{
       const w=e.target.closest('.word');
       if(!w) return;
+      if(!/^\d+\.\d+\.\d+$/.test(w.dataset.ref)) return;
       const [act,scene,line]=w.dataset.ref.split('.');
       const word=w.textContent;
       panel.innerHTML=`<strong>${word}</strong><br>Act ${act}, Scene ${scene}, Line ${line}<br><em>Loading…</em>`;
