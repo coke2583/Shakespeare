@@ -176,6 +176,10 @@ main{padding:var(--space);}
   border:1px solid var(--accent-2);
   background:var(--bg);color:var(--fg);
   font-size:16px;
+  accent-color:#fff;
+}
+#playSheet input[type=search]::-webkit-search-cancel-button{
+  filter:invert(1);
 }
 #searchSheet ul{list-style:none;margin:0;padding:0;}
 #searchSheet input[type=search]{
@@ -184,10 +188,16 @@ main{padding:var(--space);}
   border:1px solid var(--accent-2);
   background:var(--bg);color:var(--fg);
   font-size:16px;
+  /* make the built-in clear button white */
+  accent-color:#fff;
+}
+#searchSheet input[type=search]::-webkit-search-cancel-button{
+  filter:invert(1);
 }
 #searchSheet li{
   padding:0.75rem 0;border-bottom:1px solid var(--accent-2);
   cursor:pointer;min-height:48px;display:flex;align-items:center;
+  gap:.5rem;
 }
 #playSheet li{
   padding:0.75rem 0;border-bottom:1px solid var(--accent-2);

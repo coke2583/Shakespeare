@@ -3,7 +3,9 @@
 
 // Return text content for a TEI node, respecting spaces
 export function nodeText(n) {
-  if (n.nodeType === Node.TEXT_NODE) return n.nodeValue;
+  if (n.nodeType === Node.TEXT_NODE) {
+    return n.nodeValue.trim() === '' ? '' : n.nodeValue;
+  }
   switch (n.nodeName) {
     case 'w':
     case 'pc':
