@@ -251,6 +251,7 @@ header{
   background:var(--bg);display:flex;align-items:center;
   padding:var(--space);
 }
+header .brand-text{margin:0;line-height:1;}
 .play-title{margin-left:1rem;}
 header.large h1{font-size:clamp(2.4rem,3vw+1rem,4rem);}
 header.large .play-title{font-size:1.5rem;}
