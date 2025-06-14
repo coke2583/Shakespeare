@@ -629,8 +629,8 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
 
   function addCopyButtons(){
     if(!viewer) return;
-    viewer.querySelectorAll('.speech').forEach(sp=>{
-      if(sp.querySelector('.copy-btn')) return;
+    viewer.querySelectorAll('.speech .prose').forEach(p=>{
+      if(p.querySelector('.copy-btn')) return;
       const btn=document.createElement('button');
       btn.type='button';
       btn.className='copy-btn';
@@ -639,13 +639,16 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
       img.alt='Copy';
       btn.appendChild(img);
       btn.addEventListener('click',()=>{
-        const text=sp.querySelector('.speech-text')?.innerText||sp.innerText;
-        navigator.clipboard.writeText(text.trim()).then(()=>{
+        const speech=p.closest('.speech');
+        const speaker=speech?.querySelector('strong')?.innerText.trim()||'';
+        const text=p.innerText.trim();
+        const copyText=speaker?`${speaker}\n${text}`:text;
+        navigator.clipboard.writeText(copyText).then(()=>{
           img.src='assets/tick.png';
           setTimeout(()=>{img.src='assets/copyIcon.png';},2000);
         });
       });
-      sp.appendChild(btn);
+      p.appendChild(btn);
     });
   }
 

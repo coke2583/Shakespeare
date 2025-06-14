@@ -88,6 +88,7 @@ h2{font-size:clamp(1.5rem,1vw + 1rem,2.25rem);font-weight:700;}
 #viewer{white-space:pre-wrap;font-size:var(--play-font-size,1rem);}
 #cast{font-size:var(--play-font-size,1rem);}
 .speech{position:relative;margin-bottom:var(--space);}
+.speech .prose{position:relative;}
 .copy-btn{
   position:absolute;
   right:0;
