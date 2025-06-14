@@ -79,6 +79,9 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
   /* scroll position for returning after closing a sheet */
   let savedScroll = 0;
 
+  /* global overlay element for closing sheets */
+  let sheetOverlay = null;
+
   /* copy-to-clipboard buttons */
   const announce = d? d.getElementById('announce') : {textContent:''};
 
@@ -548,6 +551,12 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
   function openSheet(sheet){
     savedScroll = window.scrollY || window.pageYOffset || 0;
     document.body.style.top = `-${savedScroll}px`;
+    if(!sheetOverlay){
+      sheetOverlay = document.createElement('div');
+      sheetOverlay.className = 'sheet-overlay';
+    }
+    sheetOverlay.onclick = () => closeSheet(sheet);
+    document.body.appendChild(sheetOverlay);
     sheet.classList.add('open');
     contentsBtn.style.display = 'none';
 
@@ -568,6 +577,9 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
     document.body.classList.remove('noscroll');
     document.body.style.top = '';
     window.scrollTo(0, savedScroll);
+    if(sheetOverlay && sheetOverlay.parentNode){
+      sheetOverlay.parentNode.removeChild(sheetOverlay);
+    }
   }
 
   function renderSearchResults(items){
