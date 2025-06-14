@@ -102,6 +102,13 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
       lines.push({id, ref, text});
       if(id) lineNodes.set(id, l);
     });
+    xml.querySelectorAll('ab[n]').forEach(ab=>{
+      const id = ab.getAttribute('xml:id') || '';
+      const ref = ab.getAttribute('n') || '';
+      const text = getLineText(ab);
+      lines.push({id, ref, text});
+      if(id) lineNodes.set(id, ab);
+    });
     xml.querySelectorAll('p').forEach(p=>{
       let current = null;
       let buf = '';
@@ -204,7 +211,7 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
     sceneFirstRef = '';
     sceneLastRef  = '';
     if(scene){
-      const els = scene.querySelectorAll('lb[n], l[n]');
+      const els = scene.querySelectorAll('lb[n], l[n], ab[n]');
       if(els.length){
         sceneFirstRef = els[0].getAttribute('n') || '';
         sceneLastRef  = els[els.length-1].getAttribute('n') || '';
