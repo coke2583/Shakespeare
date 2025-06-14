@@ -21,6 +21,38 @@ export function getLineText(el) {
   return Array.from(el.childNodes).map(nodeText).join('').trim();
 }
 
+function emitTokens(parent){
+  const html = [];
+  parent.childNodes.forEach(node => {
+    if(node.nodeName === 'w'){
+      const ref = node.getAttribute('n') || '';
+      html.push(`<span class="word" data-ref="${ref}">${node.textContent}</span>`);
+      html.push(' ');
+    }else if(node.nodeName === 'pc'){
+      if(html[html.length-1] === ' ') html.pop();
+      html.push(node.textContent);
+      html.push(' ');
+    }else if(node.nodeName === 'c'){
+      html.push(' ');
+    }else{
+      html.push(teiToHtml(node));
+    }
+  });
+  if(html[html.length-1] === ' ') html.pop();
+  return html.join('');
+}
+
+function emitVerse(l){
+  const id = l.getAttribute('xml:id') || '';
+  const inner = emitTokens(l);
+  return `<p class="verse" id="${id}" data-line-id="${id}">${inner}</p>`;
+}
+
+function emitProse(p){
+  const inner = emitTokens(p);
+  return `<p class="prose">${inner}</p>`;
+}
+
 // Convert a TEI node to the HTML used by the reader
 export function teiToHtml(node) {
   if (!node) return '';
@@ -54,15 +86,11 @@ export function teiToHtml(node) {
           out += `<br id="${id}" data-line="${n}">`;
           break;
         }
-        case 'l': {
-          const id = ch.getAttribute('xml:id') || '';
-          let inner = '';
-          ch.childNodes.forEach(child => { inner += teiToHtml(child); });
-          out += `<p class="verse" id="${id}" data-line-id="${id}">` + inner + `</p>`;
+        case 'l':
+          out += emitVerse(ch);
           break;
-        }
         case 'p':
-          out += teiToHtml(ch) + '<br><br>';
+          out += emitProse(ch);
           break;
         case 'speaker': {
           out += '<strong>' + teiToHtml(ch) + '</strong>';
@@ -97,13 +125,22 @@ export function teiToHtml(node) {
             out += '<h3 class="scene-title">' + teiToHtml(ch) + '</h3>';
           }
           break;
-        case 'sp':
-          out += '<p class="speech"><span class="speech-text">' + teiToHtml(ch) + '</span>' +
+        case 'sp': {
+          let speech = '';
+          ch.childNodes.forEach(child => {
+            if(child.nodeName === 'l') speech += emitVerse(child);
+            else if(child.nodeName === 'p') speech += emitProse(child);
+            else if(child.nodeName === 'speaker') speech += '<strong>' + teiToHtml(child) + '</strong><br>';
+            else if(child.nodeName === 'stage') speech += '<em>' + teiToHtml(child) + '</em><br>';
+            else speech += teiToHtml(child);
+          });
+          out += '<p class="speech"><span class="speech-text">' + speech + '</span>' +
             '<button class="copy-btn" aria-label="Copy">' +
             '<img class="icon copy" src="assets/copyIcon.png" alt="">' +
             '<img class="icon check" src="assets/tick.png" alt="">' +
             '</button></p>';
           break;
+        }
         default:
           out += teiToHtml(ch);
       }

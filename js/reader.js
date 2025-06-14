@@ -68,6 +68,7 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
   const resumeBtn   = d? d.getElementById('resumeBtn') : null;
   const header      = d? d.querySelector('header') : null;
   const playTitleEl = d? d.getElementById('playTitle') : {textContent:''};
+  const panel       = d? d.getElementById('panel') : null;
 
   /* cached lines for search */
   let lines = [];
@@ -307,17 +308,27 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
     });
   }
 
-  // show word reference on tap or click
-  function showRef(e){
-    const w = e.target;
-    if(!w.classList.contains('word')) return;
-    const ref = w.dataset.ref;
-    const [act, scene, line] = ref.split('.');
-    alert(`"${w.textContent}" — Act ${act}, Scene ${scene}, Line ${line}`);
-  }
+  if(typeof document!=='undefined' && panel){
+    document.addEventListener('click',e=>{
+      const w=e.target.closest('.word');
+      if(!w) return;
+      const [act,scene,line]=w.dataset.ref.split('.');
+      const word=w.textContent;
+      panel.innerHTML=`<strong>${word}</strong><br>Act ${act}, Scene ${scene}, Line ${line}<br><em>Loading…</em>`;
+      panel.style.display='block';
+      fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`)
+        .then(r=>r.ok?r.json():[])
+        .then(data=>{
+          const defs=data[0]?.meanings?.[0]?.definitions||[];
+          panel.innerHTML=`<strong>${word}</strong><br>Act ${act}, Scene ${scene}, Line ${line}<ul>${defs.slice(0,3).map(d=>`<li>${d.definition}</li>`).join('')}</ul>`;
+        });
+    });
 
-  if(typeof document!=='undefined'){
-    document.addEventListener('click', showRef, false);
+    document.addEventListener('click',e=>{
+      if(!e.target.closest('.word') && !e.target.closest('#panel')){
+        panel.style.display='none';
+      }
+    });
   }
 
   /* --------------- main load ------------------ */
