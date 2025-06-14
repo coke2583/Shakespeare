@@ -32,7 +32,11 @@
   <div id="contentsSheet" class="sheet" role="dialog" aria-modal="true" aria-label="Choose Act, Scene, and Line">
     <div id="actCtrl" class="segmented"></div>
     <div id="sceneCtrl" class="segmented"></div>
-    <select id="linePicker"></select>
+    <div id="lineRange">
+      <input id="lineFrom" type="text" placeholder="From…">
+      <input id="lineTo" type="text" placeholder="To…">
+      <button id="lineGo">Go</button>
+    </div>
   </div>
 
   <div id="searchSheet" class="sheet" role="dialog" aria-modal="true" aria-label="Search lines">

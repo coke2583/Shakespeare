@@ -45,7 +45,10 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
   const d = typeof document === 'undefined' ? null : document;
   const actPicker   = d? d.createElement('select') : {value:'all'};
   const scenePicker = d? d.createElement('select') : {value:'all'};
-  const linePicker  = d? d.getElementById('linePicker') : {value:''};
+  const linePicker  = d? d.getElementById('linePicker') : null;
+  const lineFrom    = d? d.getElementById('lineFrom') : {value:''};
+  const lineTo      = d? d.getElementById('lineTo') : {value:''};
+  const lineGo      = d? d.getElementById('lineGo') : null;
   const searchSheet = d? d.getElementById('searchSheet') : null;
   const searchInput = searchSheet ? searchSheet.querySelector('input[type=search]') : null;
   const searchList  = searchSheet ? searchSheet.querySelector('ul') : null;
@@ -193,18 +196,19 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
     renderSceneSegments();
   }
 
+  let sceneFirstRef = '';
+  let sceneLastRef  = '';
+
   function populateLines(scene){
-    if(!linePicker) return;
-    linePicker.innerHTML = '';
-    linePicker.appendChild(new Option('Top',''));
+    sceneFirstRef = '';
+    sceneLastRef  = '';
     if(scene){
-      scene.querySelectorAll('lb[n], l[n]').forEach(el=>{
-        const n = el.getAttribute('n');
-        const id = el.getAttribute('xml:id');
-        if(n && id) linePicker.appendChild(new Option(n,id));
-      });
+      const els = scene.querySelectorAll('lb[n], l[n]');
+      if(els.length){
+        sceneFirstRef = els[0].getAttribute('n') || '';
+        sceneLastRef  = els[els.length-1].getAttribute('n') || '';
+      }
     }
-    linePicker.value = '';
   }
 
   /* --------------- render view ---------------- */
@@ -401,20 +405,12 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
     });
   }
 
-  if(linePicker && linePicker.addEventListener){
-    linePicker.addEventListener('change',()=>{
-      const id = linePicker.value;
+  if(lineGo && lineGo.addEventListener){
+    lineGo.addEventListener('click',()=>{
+      const from = lineFrom.value.trim();
+      const to   = lineTo.value.trim();
       closeSheet(contentsSheet);
-      if(id){
-
-        highlightLine(id);
-
-        const el = document.getElementById(id);
-        if(el) el.scrollIntoView();
-
-      }else{
-        window.scrollTo(0,0);
-      }
+      highlightRange(from||sceneFirstRef, to||sceneLastRef);
     });
   }
 
@@ -571,6 +567,35 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
     }
   }
 
+  function highlightRange(fromRef,toRef){
+    activeHighlight.forEach(el=>el.classList.remove('line-hit'));
+    activeHighlight=[];
+    let startIndex=0,endIndex=lines.length-1;
+    if(fromRef){
+      const idx=lines.findIndex(l=>l.ref===fromRef);
+      if(idx>=0) startIndex=idx;
+    }
+    if(toRef){
+      const idx=lines.findIndex(l=>l.ref===toRef);
+      if(idx>=0) endIndex=idx;
+    }
+    if(startIndex>endIndex) [startIndex,endIndex]=[endIndex,startIndex];
+    let firstEl=null;
+    for(let i=startIndex;i<=endIndex;i++){
+      const id=lines[i].id;
+      if(!id) continue;
+      viewer.querySelectorAll(`[data-line-id="${id}"]`).forEach(el=>{
+        el.classList.add('line-hit');
+        activeHighlight.push(el);
+        if(!firstEl) firstEl=el;
+      });
+    }
+    if(firstEl){
+      firstEl.scrollIntoView();
+      setTimeout(()=>activeHighlight.forEach(el=>el.classList.remove('line-hit')),3000);
+    }
+  }
+
   const PROGRESS_KEY = 'readerProgress';
 
   function getProgressData(){
@@ -594,7 +619,7 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
     data.plays[currentFile]={
       act:actPicker.value,
       scene:scenePicker.value,
-      line:linePicker?linePicker.value:'',
+      line:lineFrom?lineFrom.value:'',
       scroll:typeof scrollY==='number'?scrollY:0
     };
     try{localStorage.setItem(PROGRESS_KEY,JSON.stringify(data));}catch(e){}
@@ -618,7 +643,7 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
       scenePicker.value=prog.scene;
       displayScene();
       if(prog.line){
-        linePicker.value=prog.line;
+        lineFrom.value=prog.line;
         highlightLine(prog.line);
       }
       window.scrollTo(0,prog.scroll||0);
