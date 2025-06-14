@@ -148,7 +148,7 @@ header.compact .home-btn .icon{width:1rem;height:1rem;}
 .visually-hidden{position:absolute;left:-9999px}
 
 /* ---------- spacing tweaks ---------- */
-.word{cursor:help;}
+.word{cursor:pointer;}
 main{padding:var(--space);}
 @media(min-width:48rem){main{padding:2rem;}}
 @media(min-width:80rem){main{padding:3rem;}}
@@ -264,16 +264,7 @@ header.compact .play-title{font-size:1rem;transition:.3s;}
 .home-btn{margin-left:8px;}
 @media(min-width:48rem){.home-btn{margin-left:16px;}}
 
-/* ---------- tooltip ---------- */
-.tooltip{
-  position:fixed;max-width:60ch;background:var(--bg);color:var(--fg);
-  padding:0.5rem;border-radius:var(--radius);
-  border:1px solid var(--accent);
-  box-shadow:0 2px 6px rgba(0,0,0,.3);z-index:1000;
-}
-.lookup{cursor:help;}
-
-
+/* ---------- tooltip (removed) ---------- */
 /* ---------- act / scene titles ---------- */
 .act-title,.scene-title{font-family:'Inter',sans-serif;}
 
@@ -285,27 +276,6 @@ header.compact .play-title{font-size:1rem;transition:.3s;}
 }
 @keyframes fadeFlash{0%,60%{opacity:1}100%{opacity:0}}
 
-.line-num{
-  display:inline-block;
-  min-width:4ch;
-  width:auto;
-  margin-right:0.25rem;
-  color:var(--accent-2);
-  font-size:0.8em;
-  user-select:none;
-  text-align:right;
-}
 
-.verse{
-  position:relative;
-  padding-right:4rem;
-  margin:0;
-}
-.ln{
-  position:absolute;
-  right:0;
-  top:0;
-  font-size:.75em;
-  line-height:1;
-  pointer-events:none;
-}
+
+
