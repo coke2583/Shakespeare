@@ -169,11 +169,6 @@ main{padding:var(--space);}
   background: transparent;
   z-index:4;
 }
-#searchSheet .sheet-close{
-  position:absolute;top:0.25rem;right:0.5rem;
-  background:none;border:none;font-size:1.5rem;
-  color:var(--fg);cursor:pointer;
-}
 #playSheet ul{list-style:none;margin:0;padding:0;}
 #playSheet input[type=search]{
   width:100%;margin-bottom:.5rem;
