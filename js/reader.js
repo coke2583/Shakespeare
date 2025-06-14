@@ -49,6 +49,7 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
   const lineFrom    = d? d.getElementById('lineFrom') : {value:''};
   const lineTo      = d? d.getElementById('lineTo') : {value:''};
   const lineGo      = d? d.getElementById('lineGo') : null;
+  const lineList    = d? d.getElementById('lineList') : null;
   const searchSheet = d? d.getElementById('searchSheet') : null;
   const searchInput = searchSheet ? searchSheet.querySelector('input[type=search]') : null;
   const searchList  = searchSheet ? searchSheet.querySelector('ul') : null;
@@ -208,6 +209,28 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
         sceneFirstRef = els[0].getAttribute('n') || '';
         sceneLastRef  = els[els.length-1].getAttribute('n') || '';
       }
+    }
+    updateLineList();
+  }
+
+  function updateLineList(){
+    if(!lineList) return;
+    lineList.innerHTML = '';
+    let startIndex = 0;
+    let endIndex = lines.length - 1;
+    if(sceneFirstRef){
+      const idx = lines.findIndex(l => l.ref === sceneFirstRef);
+      if(idx >= 0) startIndex = idx;
+    }
+    if(sceneLastRef){
+      const idx = lines.findIndex(l => l.ref === sceneLastRef);
+      if(idx >= 0) endIndex = idx;
+    }
+    for(let i=startIndex; i<=endIndex; i++){
+      const opt = document.createElement('option');
+      opt.value = lines[i].ref;
+      opt.textContent = `${lines[i].ref} – ${lines[i].text.slice(0,50)}`;
+      lineList.appendChild(opt);
     }
   }
 
