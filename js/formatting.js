@@ -136,7 +136,7 @@ export function teiToHtml(node) {
             else if(child.nodeName === 'stage') speech += '<em>' + teiToHtml(child) + '</em><br>';
             else speech += teiToHtml(child);
           });
-          out += '<p class="speech"><span class="speech-text">' + speech + '</span></p>';
+          out += '<div class="speech"><span class="speech-text">' + speech + '</span></div>';
           break;
         }
         default:

@@ -609,7 +609,7 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
       img.alt='Copy';
       btn.appendChild(img);
       btn.addEventListener('click',()=>{
-        const text=sp.querySelector('.speech-text')?.innerText||sp.innerText;
+        const text = sp.innerText;
         navigator.clipboard.writeText(text.trim()).then(()=>{
           img.src='assets/tick.png';
           setTimeout(()=>{img.src='assets/copyIcon.png';},2000);
