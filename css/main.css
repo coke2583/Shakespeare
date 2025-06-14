@@ -295,3 +295,17 @@ header.compact .play-title{font-size:1rem;transition:.3s;}
   user-select:none;
   text-align:right;
 }
+
+.verse{
+  position:relative;
+  padding-right:4rem;
+  margin:0;
+}
+.ln{
+  position:absolute;
+  right:0;
+  top:0;
+  font-size:.75em;
+  line-height:1;
+  pointer-events:none;
+}

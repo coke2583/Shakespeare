@@ -56,7 +56,11 @@ export function teiToHtml(node) {
         case 'l': {
           const id = ch.getAttribute('xml:id') || '';
           const n  = ch.getAttribute('n') || '';
-          out += teiToHtml(ch) + `<br id="${id}" data-line="${n}">`;
+          let inner = '';
+          ch.childNodes.forEach(child => { inner += teiToHtml(child); });
+          out += `<p class="verse" id="${id}" data-line="${n}" data-line-id="${id}">` +
+                 inner +
+                 ` <span class="ln" aria-hidden="true">${n}</span></p>`;
           break;
         }
         case 'p':
