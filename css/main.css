@@ -96,8 +96,12 @@ h2{font-size:clamp(1.5rem,1vw + 1rem,2.25rem);font-weight:700;}
   display:inline-flex;align-items:center;justify-content:center;
   width:44px;height:44px;border-radius:50%;
   background:var(--accent);color:var(--bg);text-decoration:none;
+  transition:width .3s,height .3s;
 }
-.home-btn .icon{width:1.25rem;height:1.25rem;fill:currentColor;}
+header.compact .home-btn{width:32px;height:32px;}
+header.large   .home-btn{width:44px;height:44px;}
+.home-btn .icon{width:1.25rem;height:1.25rem;fill:currentColor;transition:width .3s,height .3s;}
+header.compact .home-btn .icon{width:1rem;height:1rem;}
 
 /* ---------- icons ---------- */
 .icon{width:1rem;height:1rem;transition:opacity .2s;vertical-align:middle;}
