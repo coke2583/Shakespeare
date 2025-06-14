@@ -61,6 +61,8 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
   const contentsSheet = d? d.getElementById('contentsSheet') : null;
   const sizeSheet   = d? d.getElementById('sizeSheet') : null;
   const sizeRange   = sizeSheet? sizeSheet.querySelector('input[type=range]') : null;
+  const savedFont   = sizeRange ? parseInt(localStorage.getItem('readerFontSize'),10) : NaN;
+  if(sizeRange && !isNaN(savedFont)) sizeRange.value = savedFont;
   const actCtrl     = d? d.getElementById('actCtrl') : null;
   const sceneCtrl   = d? d.getElementById('sceneCtrl') : null;
   const contentsBtn = d? d.querySelector('.contents-btn') : {style:{}};
@@ -505,32 +507,27 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
 
   function updateFontSize(){
     if(!sizeRange) return;
-    let offset = 0;
-    let topId = '';
-    let topEl = null;
+    let topEl=null, start=0, end=0;
     if(typeof document!=='undefined' && header){
-      const y = header.offsetHeight + 1;
-      topEl = document.elementFromPoint(0, y);
-      if(topEl){
-        offset = topEl.getBoundingClientRect().top;
-        topId = topEl.id || '';
-      }
+      const y=header.offsetHeight+1;
+      topEl=document.elementFromPoint(0,y);
+      if(topEl) start=topEl.getBoundingClientRect().top;
     }
 
-    const val = parseInt(sizeRange.value, 10);
-    if(viewer) viewer.style.fontSize = val + 'px';
-    if(castDiv) castDiv.style.fontSize = val + 'px';
+    const val=parseInt(sizeRange.value,10);
+    if(viewer) viewer.style.fontSize=val+'px';
+    if(castDiv) castDiv.style.fontSize=val+'px';
     if(typeof document!=='undefined'){
-      document.documentElement.style.setProperty('--play-font-size', val+'px');
+      document.documentElement.style.setProperty('--play-font-size',val+'px');
     }
 
     if(topEl){
-      const target = topId ? document.getElementById(topId) : topEl;
-      if(target && target.scrollIntoView){
-        target.scrollIntoView({block:'start'});
-        window.scrollBy(0, offset);
-      }
+      end=topEl.getBoundingClientRect().top;
+      savedScroll+=end-start;
+      document.body.style.top=`-${savedScroll}px`;
     }
+
+    try{localStorage.setItem('readerFontSize',val);}catch(e){}
   }
 
   if(sizeRange){
