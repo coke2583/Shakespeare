@@ -49,7 +49,6 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
   const searchSheet = d? d.getElementById('searchSheet') : null;
   const searchInput = searchSheet ? searchSheet.querySelector('input[type=search]') : null;
   const searchList  = searchSheet ? searchSheet.querySelector('ul') : null;
-  const searchClose = searchSheet ? searchSheet.querySelector('.sheet-close') : null;
   const searchBtn   = d? d.querySelector('.search-btn') : {style:{display:'none'}};
   const sizeBtn     = d? d.querySelector('.size-btn') : {style:{display:'none'}};
   const viewer      = d? d.getElementById("viewer")  : {innerHTML:'',textContent:''};
@@ -435,18 +434,15 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
     });
   }
 
-  if(searchClose){
-    searchClose.addEventListener('click',()=>closeSheet(searchSheet));
-  }
 
   if(searchInput){
     let timer=null;
     searchInput.addEventListener('input',()=>{
       clearTimeout(timer);
       timer=setTimeout(()=>{
-        const term=searchInput.value.toLowerCase();
-        const hits=term?lines.filter(l=>l.text.toLowerCase().includes(term)):[];
-        renderSearchResults(hits);
+        const term = searchInput.value.toLowerCase();
+        const hits = term ? lines.filter(l => l.text.toLowerCase().includes(term)) : [];
+        renderSearchResults(hits, term);
       },150);
     });
   }
@@ -545,14 +541,17 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
     }
   }
 
-  function renderSearchResults(items){
+  function renderSearchResults(items, term){
     if(!searchList) return;
-    searchList.innerHTML='';
-    items.forEach(l=>{
-      const li=document.createElement('li');
-      li.dataset.id=l.id;
-      const preview=l.text.slice(0,60);
-      li.innerHTML=`<div><strong>${l.ref}</strong></div><div>${preview}</div>`;
+    searchList.innerHTML = '';
+    const esc = term ? term.replace(/[.*+?^${}()|[\]\\]/g,'\\$&') : '';
+    const regex = esc ? new RegExp(`(${esc})`, 'ig') : null;
+    items.forEach(l => {
+      const li = document.createElement('li');
+      li.dataset.id = l.id;
+      let text = l.text;
+      if(regex) text = l.text.replace(regex, '<mark>$1</mark>');
+      li.innerHTML = `<div><strong>${l.ref}</strong></div><div>${text}</div>`;
       searchList.appendChild(li);
     });
   }
