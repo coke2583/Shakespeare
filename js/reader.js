@@ -74,6 +74,9 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
   let lines = [];
   const lineNodes = new Map();
 
+  /* scroll position for returning after closing a sheet */
+  let savedScroll = 0;
+
   /* copy-to-clipboard buttons */
   const announce = d? d.getElementById('announce') : {textContent:''};
 
@@ -544,6 +547,8 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
   }
 
   function openSheet(sheet){
+    savedScroll = window.scrollY || window.pageYOffset || 0;
+    document.body.style.top = `-${savedScroll}px`;
     sheet.classList.add('open');
     contentsBtn.style.display = 'none';
 
@@ -562,6 +567,8 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
     if(searchBtn) searchBtn.style.display = '';
     if(sizeBtn) sizeBtn.style.display = '';
     document.body.classList.remove('noscroll');
+    document.body.style.top = '';
+    window.scrollTo(0, savedScroll);
   }
 
   function renderSearchResults(items){
