@@ -52,7 +52,9 @@ function emitVerse(l){
 
 function emitProse(p){
   const inner = emitTokens(p);
-  return `<p class="prose">${inner}</p>`;
+  const id = p.getAttribute && p.getAttribute('xml:id');
+  const attr = id ? ` id="${id}" data-line-id="${id}"` : '';
+  return `<p class="prose"${attr}>${inner}</p>`;
 }
 
 // Convert a TEI node to the HTML used by the reader
@@ -94,6 +96,9 @@ export function teiToHtml(node) {
         case 'p':
           out += emitProse(ch);
           break;
+        case 'ab':
+          out += emitProse(ch);
+          break;
         case 'speaker': {
           out += '<strong>' + teiToHtml(ch) + '</strong>';
           let next = ch.nextElementSibling;
@@ -132,6 +137,7 @@ export function teiToHtml(node) {
           ch.childNodes.forEach(child => {
             if(child.nodeName === 'l') speech += emitVerse(child);
             else if(child.nodeName === 'p') speech += emitProse(child);
+            else if(child.nodeName === 'ab') speech += emitProse(child);
             else if(child.nodeName === 'speaker') speech += '<strong>' + teiToHtml(child) + '</strong><br>';
             else if(child.nodeName === 'stage') speech += '<em>' + teiToHtml(child) + '</em><br>';
             else speech += teiToHtml(child);
