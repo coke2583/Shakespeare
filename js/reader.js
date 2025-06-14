@@ -241,6 +241,7 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
     }
 
     viewer.innerHTML = html;
+    addCopyButtons();
     castDiv.innerHTML = "";
 
     populateLines(currentScene);
@@ -594,6 +595,28 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
       firstEl.scrollIntoView();
       setTimeout(()=>activeHighlight.forEach(el=>el.classList.remove('line-hit')),3000);
     }
+  }
+
+  function addCopyButtons(){
+    if(!viewer) return;
+    viewer.querySelectorAll('.speech').forEach(sp=>{
+      if(sp.querySelector('.copy-btn')) return;
+      const btn=document.createElement('button');
+      btn.type='button';
+      btn.className='copy-btn';
+      const img=document.createElement('img');
+      img.src='assets/copyIcon.png';
+      img.alt='Copy';
+      btn.appendChild(img);
+      btn.addEventListener('click',()=>{
+        const text=sp.querySelector('.speech-text')?.innerText||sp.innerText;
+        navigator.clipboard.writeText(text.trim()).then(()=>{
+          img.src='assets/tick.png';
+          setTimeout(()=>{img.src='assets/copyIcon.png';},2000);
+        });
+      });
+      sp.appendChild(btn);
+    });
   }
 
   const PROGRESS_KEY = 'readerProgress';
