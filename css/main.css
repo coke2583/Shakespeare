@@ -221,6 +221,20 @@ main{padding:var(--space);}
   margin-bottom:.5rem;
 }
 
+#lineRange{
+  display:flex;
+  gap:.5rem;
+  margin-bottom:.5rem;
+}
+#lineFrom,#lineTo{
+  flex:1;
+  padding:.5rem 1rem;
+  border-radius:var(--radius);
+  border:1px solid var(--accent-2);
+  background:var(--bg);
+  color:var(--fg);
+}
+
 /* hide floating button when a sheet is open */
 .sheet.open ~ .contents-btn{display:none;}
 .sheet.open ~ .search-btn{display:none;}
