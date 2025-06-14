@@ -75,9 +75,8 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
 
   /* copy-to-clipboard buttons */
   const announce = d? d.getElementById('announce') : {textContent:''};
-  const defs = new Map();
   if(viewer.addEventListener){
-    viewer.addEventListener('click',async e=>{
+    viewer.addEventListener('click',e=>{
       const btn = e.target.closest('.copy-btn');
       if(btn){
         const speech = btn.closest('.speech').querySelector('.speech-text').innerText;
@@ -87,16 +86,6 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
             announce.textContent = 'Copied!';
             setTimeout(()=>btn.classList.remove('copied'),1000);
           });
-        return;
-      }
-
-      const w = e.target.closest('.lookup');
-      if(w){
-        const word = w.dataset.word.toLowerCase();
-        const cached = defs.get(word) || await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`)
-                              .then(r=>r.json()).catch(()=>null);
-        if(!defs.has(word) && cached) defs.set(word,cached);
-        showTooltip(e.clientX,e.clientY,getDefinitionText(cached));
       }
     });
   }
@@ -256,7 +245,6 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
     }
 
     viewer.innerHTML = html;
-    insertLineNumbers();
     castDiv.innerHTML = "";
 
     populateLines(currentScene);
@@ -319,29 +307,17 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
     });
   }
 
-  function getDefinitionText(data){
-    if(!Array.isArray(data) || !data.length) return 'No definition found.';
-    const entry = data[0];
-    const defs = (entry.meanings||[])
-      .map(m=>`<strong>${m.partOfSpeech}</strong> ${m.definitions[0].definition}`)
-      .join('<br>');
-    return `<strong>${entry.word}</strong><br>${defs}`;
+  // show word reference on tap or click
+  function showRef(e){
+    const w = e.target;
+    if(!w.classList.contains('word')) return;
+    const ref = w.dataset.ref;
+    const [act, scene, line] = ref.split('.');
+    alert(`"${w.textContent}" — Act ${act}, Scene ${scene}, Line ${line}`);
   }
 
-  function showTooltip(x,y,html){
-    document.querySelectorAll('.tooltip').forEach(t=>t.remove());
-    if(!html) return;
-    const div = document.createElement('div');
-    div.className = 'tooltip';
-    div.innerHTML = html;
-    document.body.appendChild(div);
-    const rect = div.getBoundingClientRect();
-    const left = Math.min(x, window.innerWidth - rect.width - 10);
-    div.style.left = left + 'px';
-    div.style.top  = (y - rect.height - 10) + 'px';
-    setTimeout(()=>{
-      document.addEventListener('click',()=>div.remove(),{once:true});
-    },0);
+  if(typeof document!=='undefined'){
+    document.addEventListener('click', showRef, false);
   }
 
   /* --------------- main load ------------------ */
@@ -582,24 +558,6 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
       });
       setTimeout(()=>activeHighlight.forEach(el=>el.classList.remove('line-hit')),3000);
     }
-  }
-
-  function insertLineNumbers(){
-    if(!viewer) return;
-    viewer.querySelectorAll('.line-num').forEach(n=>n.remove());
-    const brs = viewer.querySelectorAll('br[data-line]');
-    brs.forEach(br=>{
-      const n = br.getAttribute('data-line');
-      if(!n) return;
-      const num = parseInt(n.split('.').pop(),10);
-      if(num % 5 === 0){
-        const span=document.createElement('span');
-        span.className='line-num';
-        span.textContent=n;
-        span.dataset.lineId=br.id;
-        br.after(span,' ');
-      }
-    });
   }
 
   const PROGRESS_KEY = 'readerProgress';

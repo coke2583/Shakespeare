@@ -39,7 +39,8 @@ export function teiToHtml(node) {
     } else {
       switch (ch.nodeName) {
         case 'w':
-          out += `<span class="lookup" data-word="${ch.textContent}">${ch.textContent}</span>`;
+          const ref = ch.getAttribute('n') || '';
+          out += `<span class="word" data-ref="${ref}">${ch.textContent}</span>`;
           break;
         case 'pc':
           out += ch.textContent;
@@ -55,12 +56,9 @@ export function teiToHtml(node) {
         }
         case 'l': {
           const id = ch.getAttribute('xml:id') || '';
-          const n  = ch.getAttribute('n') || '';
           let inner = '';
           ch.childNodes.forEach(child => { inner += teiToHtml(child); });
-          out += `<p class="verse" id="${id}" data-line="${n}" data-line-id="${id}">` +
-                 inner +
-                 ` <span class="ln" aria-hidden="true">${n}</span></p>`;
+          out += `<p class="verse" id="${id}" data-line-id="${id}">` + inner + `</p>`;
           break;
         }
         case 'p':
