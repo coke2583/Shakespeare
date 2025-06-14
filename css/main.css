@@ -95,6 +95,11 @@ h2{font-size:clamp(1.5rem,1vw + 1rem,2.25rem);font-weight:700;}
   border:none;background:none;padding:0;
   cursor:pointer;
 }
+.copy-btn .icon{
+  position:absolute;
+  top:0;
+  left:0;
+}
 
 /* ---------- navigation ---------- */
 .home-btn{
