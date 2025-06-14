@@ -76,17 +76,37 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
 
   /* copy-to-clipboard buttons */
   const announce = d? d.getElementById('announce') : {textContent:''};
+
+  function fallbackCopy(text){
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    try{ document.execCommand('copy'); }catch(e){}
+    document.body.removeChild(ta);
+    return Promise.resolve();
+  }
+
+  function copyText(text){
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      return navigator.clipboard.writeText(text).catch(()=>fallbackCopy(text));
+    }
+    return fallbackCopy(text);
+  }
+
   if(viewer.addEventListener){
     viewer.addEventListener('click',e=>{
       const btn = e.target.closest('.copy-btn');
       if(btn){
         const speech = btn.closest('.speech').querySelector('.speech-text').innerText;
-        navigator.clipboard.writeText(speech)
-          .then(()=>{
-            btn.classList.add('copied');
-            announce.textContent = 'Copied!';
-            setTimeout(()=>btn.classList.remove('copied'),1000);
-          });
+        copyText(speech).then(()=>{
+          btn.classList.add('copied');
+          announce.textContent = 'Copied!';
+          setTimeout(()=>btn.classList.remove('copied'),1000);
+        });
       }
     });
   }
