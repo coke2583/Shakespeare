@@ -100,18 +100,21 @@ import { teiToHtml, nodeText, getLineText } from './formatting.js';
     return fallbackCopy(text);
   }
 
-  if(viewer.addEventListener){
-    viewer.addEventListener('click',e=>{
-      const btn = e.target.closest('.copy-btn');
-      if(btn){
-        const speech = btn.closest('.speech').querySelector('.speech-text').innerText;
-        copyText(speech).then(()=>{
-          btn.classList.add('copied');
-          announce.textContent = 'Copied!';
-          setTimeout(()=>btn.classList.remove('copied'),1000);
-        });
-      }
-    });
+  function handleCopy(e){
+    const btn = e.target.closest('.copy-btn');
+    if(btn){
+      const speechEl = btn.closest('.speech').querySelector('.speech-text');
+      const speech = speechEl ? speechEl.textContent : '';
+      copyText(speech).then(()=>{
+        btn.classList.add('copied');
+        announce.textContent = 'Copied!';
+        setTimeout(()=>btn.classList.remove('copied'),1000);
+      });
+    }
+  }
+
+  if(document.addEventListener){
+    document.addEventListener('click', handleCopy);
   }
 
   const parser      = (typeof DOMParser==='undefined') ? {parseFromString:()=>null} : new DOMParser();
